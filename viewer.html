@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Low poly apples · отладочный просмотрщик</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #16181d;
+    color: #e8e8ea;
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow: hidden;
+  }
+  #canvas-host { position: fixed; inset: 0; }
+  #ui {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(28, 31, 38, 0.82);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  #ui h1 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+  .picker { display: flex; gap: 6px; }
+  button {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  button:hover { background: rgba(255, 255, 255, 0.11); }
+  button[aria-pressed="true"] { background: #d8453b; border-color: #e8655b; }
+  label { display: flex; align-items: center; gap: 7px; color: #a8abb4; cursor: pointer; }
+  #stats { color: #8d919b; font-variant-numeric: tabular-nums; }
+  #hint { position: fixed; bottom: 16px; left: 16px; color: #6e727c; }
+</style>
+</head>
+<body>
+<div id="canvas-host"></div>
+
+<div id="ui">
+  <h1>Low poly apples · CC0</h1>
+  <div class="picker" id="picker"></div>
+  <label><input type="checkbox" id="spin" checked> автоповорот</label>
+  <label><input type="checkbox" id="smooth" checked> сглаживание</label>
+  <label><input type="checkbox" id="wire"> wireframe</label>
+  <div id="stats">—</div>
+</div>
+<div id="hint">ЛКМ — вращать · колесо — зум · ПКМ — панорама · <a href="index.html" style="color:#8d919b">на сайт →</a></div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+const MODELS = [
+  { name: 'Красное',    file: 'models/apple_kenney.glb' },
+  { name: 'Зелёное',    file: 'models/apple_green_quaternius.glb' },
+  { name: 'Половинка',  file: 'models/apple_half_kenney.glb' },
+];
+
+const host = document.getElementById('canvas-host');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+host.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x16181d);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 100);
+camera.position.set(1.6, 1.2, 2.2);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotateSpeed = 1.6;
+
+const key = new THREE.DirectionalLight(0xffffff, 2.4);
+key.position.set(3, 5, 2);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.near = 0.5;
+key.shadow.camera.far = 20;
+const d = 2;
+Object.assign(key.shadow.camera, { left: -d, right: d, top: d, bottom: -d });
+scene.add(key, new THREE.AmbientLight(0xffffff, 0.35));
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(4, 64).rotateX(-Math.PI / 2),
+  new THREE.ShadowMaterial({ opacity: 0.35 })
+);
+ground.receiveShadow = true;
+scene.add(ground);
+
+const loader = new GLTFLoader();
+let current = null;
+
+// GLB-файлы приходят в разных масштабах, поэтому нормализуем по bounding box.
+function fit(object) {
+  const box = new THREE.Box3().setFromObject(object);
+  const size = box.getSize(new THREE.Vector3());
+  const scale = 1 / Math.max(size.x, size.y, size.z);
+  object.scale.setScalar(scale);
+
+  const scaled = new THREE.Box3().setFromObject(object);
+  const center = scaled.getCenter(new THREE.Vector3());
+  object.position.sub(new THREE.Vector3(center.x, scaled.min.y, center.z));
+}
+
+// Quaternius/Kenney экспортируют нормали уже запечёнными «по грани»: вершины
+// продублированы на каждый треугольник (у зелёного яблока 528 вершин на 130
+// уникальных позиций), поэтому одного flatShading = false недостаточно.
+// mergeVertices сравнивает ВСЕ атрибуты сразу, так что перед сваркой надо
+// снести normal (и неиспользуемые UV) — иначе дубликаты не схлопнутся.
+function weld(geometry, tolerance = 1e-6) {
+  const g = geometry.clone();
+  for (const name of ['normal', 'uv', 'uv1', 'uv2', 'uv3', 'tangent']) g.deleteAttribute(name);
+  const merged = BufferGeometryUtils.mergeVertices(g, tolerance);
+  g.dispose();
+  merged.computeVertexNormals();
+  return merged;
+}
+
+function countTris(object) {
+  let tris = 0;
+  object.traverse((o) => {
+    const g = o.geometry;
+    if (!g) return;
+    tris += (g.index ? g.index.count : g.attributes.position.count) / 3;
+  });
+  return tris;
+}
+
+async function show(index) {
+  const { file, name } = MODELS[index];
+  const gltf = await loader.loadAsync(file);
+
+  if (current) {
+    scene.remove(current);
+    current.traverse((o) => {
+      o.userData.flat?.dispose();
+      o.userData.smooth?.dispose();
+    });
+  }
+
+  current = gltf.scene;
+  current.traverse((o) => {
+    if (!o.isMesh) return;
+    o.castShadow = true;
+    o.userData.flat = o.geometry;
+    o.userData.smooth = weld(o.geometry);
+  });
+  fit(current);
+  scene.add(current);
+
+  applyShading();
+  applyWireframe();
+  controls.target.set(0, 0.5, 0);
+  let flatVerts = 0, weldedVerts = 0;
+  current.traverse((o) => {
+    if (!o.isMesh) return;
+    flatVerts += o.userData.flat.attributes.position.count;
+    weldedVerts += o.userData.smooth.attributes.position.count;
+  });
+  document.getElementById('stats').textContent =
+    `${name} · ${countTris(current)} тр. · вершины ${flatVerts} → ${weldedVerts}`;
+
+  for (const btn of picker.children) {
+    btn.setAttribute('aria-pressed', String(Number(btn.dataset.index) === index));
+  }
+}
+
+function applyShading() {
+  const smooth = document.getElementById('smooth').checked;
+  current?.traverse((o) => {
+    if (!o.isMesh) return;
+    o.geometry = smooth ? o.userData.smooth : o.userData.flat;
+    o.material.flatShading = !smooth;
+    o.material.needsUpdate = true;
+  });
+}
+
+const WIRE_COLOR = new THREE.Color(0x6ad8ff);
+
+function applyWireframe() {
+  const on = document.getElementById('wire').checked;
+  current?.traverse((o) => {
+    if (!o.isMesh) return;
+    const mat = o.material;
+    mat.userData.baseColor ??= mat.color.clone();
+    mat.wireframe = on;
+    mat.color.copy(on ? WIRE_COLOR : mat.userData.baseColor);
+  });
+}
+
+const picker = document.getElementById('picker');
+MODELS.forEach((m, i) => {
+  const btn = document.createElement('button');
+  btn.textContent = m.name;
+  btn.dataset.index = i;
+  btn.onclick = () => show(i);
+  picker.appendChild(btn);
+});
+
+document.getElementById('wire').onchange = applyWireframe;
+document.getElementById('smooth').onchange = applyShading;
+document.getElementById('spin').onchange = (e) => { controls.autoRotate = e.target.checked; };
+controls.autoRotate = true;
+
+function resize() {
+  const { clientWidth: w, clientHeight: h } = host;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+show(1);
+</script>
+</body>
+</html>

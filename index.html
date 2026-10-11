@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vanök Regular — graphic designer and art director</title>
+<link rel="icon" href="data:,">
+<style>
+  /* Кадр Figma 1:2 — 1440×800. --k переводит его пиксели во вьюпорт.
+     На герое навигация стоит на вертикальной середине, как в макете. */
+  :root {
+    --bg: #d7d7d7;
+    --blue: #0c6df4;
+    --blue-fill: #0c7cf4;
+    --blue-on: #e1e1e1;
+    --grotesk: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    --k: calc(100vw / 1440);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; background: var(--bg); }
+
+  body {
+    color: var(--blue);
+    font-family: var(--grotesk);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Холст живёт всё время: смена hash не пересоздаёт WebGL. */
+  #stage { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  #stage canvas { display: block; width: 100%; height: 100%; }
+
+  #app { position: relative; z-index: 2; }
+
+  .chrome { position: relative; }
+  .chrome.mid { height: 100vh; }
+  .chrome.top { height: calc(210 * var(--k)); }
+  .chrome > * { position: absolute; }
+
+  .crosshair {
+    left: calc(11.23 * var(--k));
+    width: calc(21.535 * var(--k));
+    height: calc(21.535 * var(--k));
+  }
+  .chrome.mid .crosshair { top: calc(50% - 10.77 * var(--k)); }
+  .chrome.top .crosshair { top: calc(14 * var(--k)); }
+
+  .nav-text {
+    font-size: calc(16 * var(--k));
+    line-height: 1.15;
+    font-weight: 400;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--blue);
+  }
+
+  .tagline {
+    left: calc(408 * var(--k));
+    transform: translateX(-50%);
+    text-align: center;
+    margin: 0;
+  }
+  .chrome.mid .tagline { top: calc(50% - 9 * var(--k)); }
+  .chrome.top .tagline { top: calc(16 * var(--k)); }
+
+  .nav-index { left: calc(1216 * var(--k)); }
+  .chrome.mid .nav-index { top: calc(50% - 8 * var(--k)); }
+  .chrome.top .nav-index { top: calc(16 * var(--k)); }
+
+  .nav-about {
+    left: calc(1407.05 * var(--k));
+    transform: translateX(-50%);
+  }
+  .chrome.mid .nav-about { top: calc(50% - 8 * var(--k)); }
+  .chrome.top .nav-about { top: calc(16 * var(--k)); }
+
+  .mark { display: block; }
+  .mark-vanok {
+    left: calc(702 * var(--k));
+    width: calc(233.497 * var(--k));
+    height: calc(162.055 * var(--k));
+  }
+  .mark-regular {
+    left: calc(869.69 * var(--k));
+    width: calc(320.501 * var(--k));
+    height: calc(134.883 * var(--k));
+  }
+  .chrome.mid .mark-vanok { top: calc(50% - 81.53 * var(--k)); }
+  .chrome.mid .mark-regular { top: calc(50% - 56.77 * var(--k)); }
+  .chrome.top .mark-vanok { top: calc(12 * var(--k)); }
+  .chrome.top .mark-regular { top: calc(36 * var(--k)); }
+
+  a[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
+
+  .sheet {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: calc(18 * var(--k));
+    padding: 0 0 14vh calc(72 * var(--k));
+  }
+
+  .sheet h2 {
+    margin: 0;
+    font-size: clamp(18px, calc(24 * var(--k)), 24px);
+    font-weight: 400;
+    max-width: 22ch;
+  }
+
+  .sheet p {
+    margin: 0;
+    font-size: clamp(13px, calc(16 * var(--k)), 16px);
+    max-width: 34ch;
+  }
+
+  .index-list { margin: 0; padding: 0; list-style: none; max-width: calc(560 * var(--k)); }
+  .index-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: calc(14 * var(--k)) 0;
+    border-top: 1px solid rgba(12, 109, 244, 0.35);
+    font-size: clamp(13px, calc(16 * var(--k)), 16px);
+  }
+  .index-list li:last-child { border-bottom: 1px solid rgba(12, 109, 244, 0.35); }
+
+  .pill {
+    align-self: flex-start;
+    background: var(--blue-fill);
+    color: var(--blue-on);
+    border-radius: calc(30 * var(--k));
+    padding: calc(12 * var(--k)) calc(16 * var(--k));
+    font-size: clamp(14px, calc(18 * var(--k)), 18px);
+    text-decoration: none;
+  }
+
+  .case {
+    max-width: calc(520 * var(--k));
+    margin: calc(12 * var(--k)) 0 0 calc(72 * var(--k));
+    display: flex;
+    flex-direction: column;
+    gap: calc(14 * var(--k));
+  }
+  .case h2 { margin: 0; font-size: calc(16 * var(--k)); font-weight: 400; }
+  .case p { margin: 0; font-size: calc(16 * var(--k)); max-width: 36ch; }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: 1.15fr 0.55fr 0.85fr;
+    gap: calc(16 * var(--k));
+    padding: calc(28 * var(--k)) calc(48 * var(--k)) calc(48 * var(--k));
+  }
+  .tile {
+    height: calc(240 * var(--k));
+    border: 1px solid rgba(12, 109, 244, 0.28);
+    background: rgba(255, 255, 255, 0.16);
+  }
+  .tile.wide { height: calc(300 * var(--k)); }
+
+  .about-block {
+    max-width: calc(420 * var(--k));
+    margin: calc(48 * var(--k)) 0 0 calc(72 * var(--k));
+    display: flex;
+    flex-direction: column;
+    gap: calc(16 * var(--k));
+  }
+  .about-block h2 { margin: 0; font-weight: 400; font-size: calc(24 * var(--k)); }
+  .about-block p { margin: 0; font-size: calc(16 * var(--k)); max-width: 34ch; }
+  .quiet {
+    margin: calc(48 * var(--k)) 0 0 calc(72 * var(--k));
+    font-size: calc(14 * var(--k));
+  }
+  .quiet a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div id="stage" aria-hidden="true"></div>
+<div id="app"></div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+const DESIGN_W = 1440;
+const DESIGN_MID = 400;
+const APPLE_CX = 609;
+const APPLE_CY = 200;
+const APPLE_D = 304;
+const SPIN_PER_PX = 0.0065;
+const G = 2.35;
+
+const app = document.getElementById('app');
+const stage = document.getElementById('stage');
+
+const chrome = (mode, current) => {
+  const cur = (name) => current === name ? ' aria-current="page"' : '';
+  return `
+    <a class="crosshair" href="#/"><img src="design/assets/crosshair.svg" alt="" width="22" height="22"></a>
+    <p class="nav-text tagline">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
+    <img class="mark mark-vanok" src="design/assets/wordmark-vanok.svg" alt="Vanök">
+    <img class="mark mark-regular" src="design/assets/wordmark-regular.svg" alt="Regular">
+    <a class="nav-text nav-index" href="#/index"${cur('index')}>Index</a>
+    <a class="nav-text nav-about" href="#/about"${cur('about')}>About</a>
+  `;
+};
+
+const TEMPLATES = {
+  hero: () => `
+    <header class="chrome mid">${chrome('mid', 'hero')}</header>
+    <section class="sheet" id="work">
+      <h2>SALUKI Wild Ea$t album identity</h2>
+      <p>A graphic world for an artist’s release with millions of listens.</p>
+      <a class="pill" href="#/index">full case</a>
+    </section>
+    <section class="sheet" id="notes">
+      <h2>Selected work</h2>
+      <ul class="index-list">
+        <li><span>SALUKI — Wild Ea$t</span><span>2024</span></li>
+        <li><span>Ventonyl — type specimen</span><span>2024</span></li>
+        <li><span>Cofef — packaging</span><span>2023</span></li>
+        <li><span>Poster series — Belgrad</span><span>2023</span></li>
+      </ul>
+    </section>
+  `,
+  index: () => `
+    <header class="chrome top">${chrome('top', 'index')}</header>
+    <section class="case">
+      <h2>SALUKI Wild Ea$t album identity</h2>
+      <p>A graphic world for an artist’s release with millions of listens.</p>
+      <a class="pill" href="#/index">full case</a>
+    </section>
+    <div class="tiles" aria-hidden="true">
+      <div class="tile"></div>
+      <div class="tile"></div>
+      <div class="tile wide"></div>
+    </div>
+  `,
+  about: () => `
+    <header class="chrome top">${chrome('top', 'about')}</header>
+    <section class="about-block">
+      <h2>About</h2>
+      <p>A graphic world for an artist’s release with millions of listens — identity, type and art direction.</p>
+      <p>Belgrad, Serbia. Available for commissions.</p>
+    </section>
+    <p class="quiet"><a href="viewer.html">model viewer</a></p>
+  `,
+};
+
+function parseRoute() {
+  const raw = (location.hash || '').replace(/^#/, '').replace(/^\//, '');
+  if (raw === 'index') return 'index';
+  if (raw === 'about') return 'about';
+  return 'hero';
+}
+
+function heroAnchor() {
+  const k = innerWidth / DESIGN_W;
+  return {
+    fx: APPLE_CX / DESIGN_W,
+    fy: 0.5 + (APPLE_CY - DESIGN_MID) * k / innerHeight,
+  };
+}
+
+function anchorFor(name) {
+  if (name === 'index') return { fx: 0.5, fy: 0.7 };
+  if (name === 'about') return { fx: 0.7, fy: 0.58 };
+  return heroAnchor();
+}
+
+let route = parseRoute();
+let phase = 'rest';
+let fx = 0.5, fy = 0.3, destFx = fx, destFy = fy;
+let vy = 0, e = 0.64, flyT = 0;
+let yaw = 0, yawVel = 0;
+
+function paint(name) {
+  document.body.dataset.route = name;
+  app.innerHTML = TEMPLATES[name]();
+}
+
+function nearestTurn(target, current) {
+  const tau = Math.PI * 2;
+  return target + Math.round((current - target) / tau) * tau;
+}
+
+function launch(tx, ty) {
+  destFx = tx;
+  destFy = ty;
+  e = 0.64;
+  flyT = 0;
+  yawVel += 3.6;
+  if (Math.abs(fy - ty) < 0.02 && Math.abs(fx - tx) < 0.02) {
+    phase = 'settle';
+    vy = 0;
+    return;
+  }
+  phase = 'fly';
+  if (fy > ty + 0.012) {
+    vy = -Math.sqrt(2 * G * (fy - ty + 0.16));
+  } else {
+    vy = 0.02;
+  }
+}
+
+paint(route);
+{
+  const a = anchorFor(route);
+  fx = destFx = a.fx;
+  fy = destFy = a.fy;
+  phase = route === 'hero' ? 'scroll' : 'rest';
+}
+
+addEventListener('hashchange', () => {
+  const next = parseRoute();
+  if (next === route) return;
+  route = next;
+  paint(route);
+  scrollTo(0, 0);
+  const a = anchorFor(route);
+  if (ready) launch(a.fx, a.fy);
+  else {
+    fx = destFx = a.fx;
+    fy = destFy = a.fy;
+    phase = route === 'hero' ? 'scroll' : 'rest';
+  }
+});
+
+// --- сцена: камера всегда строго над яблоком --------------------------------
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setClearAlpha(0);
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 80);
+camera.position.set(0, 40, 0);
+camera.up.set(0, 0, 1);
+camera.lookAt(0, 0, 0);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.16;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+scene.add(new THREE.HemisphereLight(0xfff6ea, 0xd5d8cc, 0.2));
+const key = new THREE.DirectionalLight(0xfff8ee, 0.78);
+key.position.set(-2.4, 7.5, 3.4);
+scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.1);
+fill.position.set(2.4, 5, -1.6);
+scene.add(fill);
+
+function shadowTexture() {
+  const s = 1024;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(s / 2, s / 2, s * 0.02, s / 2, s / 2, s * 0.5);
+  grd.addColorStop(0, 'rgba(58,58,58,0.55)');
+  grd.addColorStop(0.22, 'rgba(68,68,68,0.22)');
+  grd.addColorStop(0.5, 'rgba(80,80,80,0.07)');
+  grd.addColorStop(1, 'rgba(80,80,80,0)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const shadowMat = new THREE.MeshBasicMaterial({
+  map: shadowTexture(),
+  transparent: true,
+  depthWrite: false,
+  toneMapped: false,
+  opacity: 0.48,
+  side: THREE.DoubleSide,
+});
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadowMat);
+shadow.position.set(0.4, -1.2, -0.22);
+shadow.scale.setScalar(4.1);
+shadow.lookAt(camera.position);
+shadow.renderOrder = -2;
+scene.add(shadow);
+
+const spin = new THREE.Group();
+const aim = new THREE.Group();
+spin.add(aim);
+scene.add(spin);
+
+const LOOK = {
+  PaleGreen: { color: 0xaaff28, emissive: 0xb4f040, emissiveIntensity: 0.1, metalness: 0, roughness: 0.42 },
+  DarkBrown: { color: 0x7a4e28, emissive: 0x000000, emissiveIntensity: 0, metalness: 0, roughness: 0.64 },
+  DarkGreen: { color: 0x2f861f, emissive: 0x14300a, emissiveIntensity: 0.18, metalness: 0, roughness: 0.52 },
+};
+
+function materialsOf(mesh) {
+  return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+}
+
+function smoothShade(root, tolerance = 1e-4) {
+  let before = 0, after = 0;
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    const src = o.geometry;
+    before += src.attributes.position.count;
+    for (const name of ['normal', 'uv', 'uv1', 'uv2', 'uv3', 'tangent', 'color']) src.deleteAttribute(name);
+    const merged = BufferGeometryUtils.mergeVertices(src, tolerance);
+    merged.computeVertexNormals();
+    src.dispose();
+    o.geometry = merged;
+    after += merged.attributes.position.count;
+    for (const m of materialsOf(o)) {
+      m.flatShading = false;
+      m.needsUpdate = true;
+    }
+  });
+  return { before, after };
+}
+
+function meshByMaterial(root, name) {
+  let found = null;
+  root.traverse((o) => {
+    if (o.isMesh && materialsOf(o).some((m) => m.name === name)) found = o;
+  });
+  return found;
+}
+
+function paintApple(root) {
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    for (const m of materialsOf(o)) {
+      const look = LOOK[m.name];
+      if (!look) continue;
+      m.color.setHex(look.color);
+      m.emissive.setHex(look.emissive);
+      m.emissiveIntensity = look.emissiveIntensity;
+      m.metalness = look.metalness;
+      m.roughness = look.roughness;
+      m.envMapIntensity = m.name === 'PaleGreen' ? 0.22 : 0.12;
+      m.side = m.name === 'DarkGreen' ? THREE.DoubleSide : THREE.FrontSide;
+      m.flatShading = false;
+      m.needsUpdate = true;
+    }
+  });
+}
+
+// Лист в модели стоит ребром. Разворачиваем пластинку нормалью к камере,
+// вращая вокруг основания — ближайшей к телу вершины.
+function faceLeafToCamera(leaf, bodyCenter) {
+  const viewDir = new THREE.Vector3(0, 1, 0);
+  leaf.updateWorldMatrix(true, false);
+  const toWorld = leaf.matrixWorld;
+  const attr = leaf.geometry.attributes.position;
+  const pts = [];
+  for (let i = 0; i < attr.count; i++) {
+    pts.push(new THREE.Vector3().fromBufferAttribute(attr, i).applyMatrix4(toWorld));
+  }
+  const mean = new THREE.Vector3();
+  for (const p of pts) mean.add(p);
+  mean.multiplyScalar(1 / pts.length);
+
+  const c = new Array(9).fill(0);
+  for (const p of pts) {
+    const d = p.clone().sub(mean);
+    c[0] += d.x * d.x; c[1] += d.x * d.y; c[2] += d.x * d.z;
+    c[4] += d.y * d.y; c[5] += d.y * d.z; c[8] += d.z * d.z;
+  }
+  c[3] = c[1]; c[6] = c[2]; c[7] = c[5];
+  const trace = c[0] + c[4] + c[8];
+  const m = c.map((x, i) => (i % 4 === 0 ? trace - x : -x));
+  const n = new THREE.Vector3(0.41, 0.82, 0.41).normalize();
+  for (let i = 0; i < 80; i++) {
+    n.set(
+      m[0] * n.x + m[1] * n.y + m[2] * n.z,
+      m[3] * n.x + m[4] * n.y + m[5] * n.z,
+      m[6] * n.x + m[7] * n.y + m[8] * n.z,
+    ).normalize();
+  }
+  if (n.dot(viewDir) < 0) n.negate();
+
+  let base = pts[0], best = Infinity;
+  for (const p of pts) {
+    const d2 = p.distanceToSquared(bodyCenter);
+    if (d2 < best) { best = d2; base = p; }
+  }
+  const world = new THREE.Matrix4()
+    .makeTranslation(base.x, base.y, base.z)
+    .multiply(new THREE.Matrix4().makeRotationFromQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(n, viewDir)))
+    .multiply(new THREE.Matrix4().makeTranslation(-base.x, -base.y, -base.z));
+  const inv = new THREE.Matrix4().copy(toWorld).invert();
+  leaf.geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, world).multiply(toWorld));
+  leaf.geometry.computeVertexNormals();
+}
+
+function centerOf(mesh) {
+  return new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
+}
+
+let ready = false;
+let shadeStats = null;
+let bodyMat = null;
+
+const gltf = await new GLTFLoader().loadAsync('models/apple_green_quaternius.glb');
+const model = gltf.scene;
+shadeStats = smoothShade(model);
+paintApple(model);
+
+const body = meshByMaterial(model, 'PaleGreen');
+const stem = meshByMaterial(model, 'DarkBrown');
+const leaf = meshByMaterial(model, 'DarkGreen');
+bodyMat = materialsOf(body).find((m) => m.name === 'PaleGreen');
+
+aim.add(model);
+spin.updateMatrixWorld(true);
+
+// Черенок — к камере (+Y). Камера стоит над яблоком и смотрит вниз.
+const stemDir = centerOf(stem).sub(centerOf(body));
+if (stemDir.lengthSq() > 1e-8) {
+  model.quaternion.setFromUnitVectors(stemDir.normalize(), new THREE.Vector3(0, 1, 0));
+}
+spin.updateMatrixWorld(true);
+faceLeafToCamera(leaf, centerOf(body));
+
+// Масштаб: диаметр тела = 1. Центр тела — в начале координат.
+{
+  const box = new THREE.Box3().setFromObject(body);
+  const size = box.getSize(new THREE.Vector3());
+  const diam = Math.max(size.x, size.z, 1e-6);
+  const c = box.getCenter(new THREE.Vector3());
+  model.scale.setScalar(1 / diam);
+  model.position.copy(c).multiplyScalar(-1 / diam);
+}
+spin.updateMatrixWorld(true);
+
+// Лист в верхний левый квадрант, как на макете. Вращение только вокруг Y —
+// верх яблока остаётся к камере.
+{
+  const rel = centerOf(leaf).sub(centerOf(body));
+  const current = Math.atan2(rel.z, rel.x);
+  const desired = Math.atan2(0.68, -0.55);
+  // Положительный rotation.y уменьшает atan2(z, x), поэтому знак такой.
+  aim.rotation.y = current - desired;
+}
+spin.updateMatrixWorld(true);
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+}
+addEventListener('resize', resize);
+resize();
+
+function updateCamera() {
+  const w = innerWidth, h = innerHeight;
+  const applePx = APPLE_D * (w / DESIGN_W);
+  const worldPerPx = 1 / applePx;
+  const visibleW = w * worldPerPx;
+  const visibleH = h * worldPerPx;
+  const sx = fx * w;
+  const sy = fy * h;
+  camera.left = -(sx / w) * visibleW;
+  camera.right = camera.left + visibleW;
+  camera.top = (sy / h) * visibleH;
+  camera.bottom = camera.top - visibleH;
+  camera.updateProjectionMatrix();
+}
+
+function step(dt) {
+  if (phase === 'fly') {
+    flyT += dt;
+    const prev = fy;
+    vy += G * dt;
+    fy += vy * dt;
+    fx += (destFx - fx) * (1 - Math.exp(-5 * dt));
+    yaw += yawVel * dt;
+    yawVel *= Math.exp(-dt * 0.55);
+    if (vy > 0 && prev <= destFy && fy >= destFy) {
+      fy = destFy;
+      if (Math.abs(vy) < 0.34) {
+        vy = 0;
+        phase = 'settle';
+      } else {
+        vy = -vy * e;
+        e *= 0.73;
+        yawVel += 1.8 + Math.abs(vy) * 1.4;
+      }
+    }
+    if (flyT > 7) {
+      fx = destFx;
+      fy = destFy;
+      vy = 0;
+      phase = 'settle';
+    }
+    const air = Math.min(Math.abs(vy) * 0.45, 0.4);
+    spin.scale.setScalar(1 + air * 0.07);
+    shadow.scale.setScalar(4.1 * (1 + air * 0.35));
+    shadowMat.opacity = 0.48 * (1 - air * 0.28);
+  } else if (phase === 'scroll') {
+    const target = -scrollY * SPIN_PER_PX;
+    yaw += (target - yaw) * (1 - Math.exp(-dt * 8));
+    yawVel = 0;
+    const a = heroAnchor();
+    fx += (a.fx - fx) * (1 - Math.exp(-dt * 10));
+    fy += (a.fy - fy) * (1 - Math.exp(-dt * 10));
+    spin.scale.setScalar(1);
+    shadow.scale.setScalar(4.1);
+    shadowMat.opacity = 0.48;
+  } else if (phase === 'settle') {
+    const raw = route === 'hero' ? -scrollY * SPIN_PER_PX : 0;
+    const target = route === 'hero' ? raw : nearestTurn(raw, yaw);
+    yaw += (target - yaw) * (1 - Math.exp(-dt * 4));
+    yawVel = 0;
+    fx += (destFx - fx) * (1 - Math.exp(-dt * 8));
+    fy += (destFy - fy) * (1 - Math.exp(-dt * 8));
+    spin.scale.setScalar(1);
+    shadow.scale.setScalar(4.1);
+    shadowMat.opacity = 0.48;
+    if (Math.abs(target - yaw) < 0.02 && Math.abs(destFy - fy) < 0.004) {
+      phase = route === 'hero' ? 'scroll' : 'rest';
+    }
+  } else {
+    yaw += (nearestTurn(0, yaw) - yaw) * (1 - Math.exp(-dt * 4));
+    spin.scale.setScalar(1);
+    shadow.scale.setScalar(4.1);
+    shadowMat.opacity = 0.48;
+  }
+  spin.rotation.set(0, yaw, 0);
+}
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (ready) step(dt);
+  updateCamera();
+  renderer.render(scene, camera);
+});
+
+ready = true;
+
+const col = bodyMat.color;
+globalThis.__apple = {
+  THREE,
+  scene,
+  camera,
+  spin,
+  shadeStats,
+  debug: () => ({
+    route,
+    phase,
+    fx, fy, vy, yaw, yawVel, e,
+    shade: shadeStats,
+    body: col.getStyle(),
+    stem: materialsOf(stem).find((m) => m.name === 'DarkBrown').color.getStyle(),
+    leaf: materialsOf(leaf).find((m) => m.name === 'DarkGreen').color.getStyle(),
+    scrollY,
+  }),
+};
+</script>
+</body>
+</html>
