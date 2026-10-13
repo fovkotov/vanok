@@ -99,6 +99,34 @@ blob.rotation.x = -Math.PI / 2;
 blob.position.y = 0.004;
 scene.add(blob);
 
+const imprintMap = await new THREE.TextureLoader().loadAsync('models/stamp_imprint.png');
+imprintMap.colorSpace = THREE.SRGBColorSpace;
+imprintMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+// Outer ink ring is ~546px across inside the 1200×630 sheet. The pad is ±0.4 before SIZE.
+const inkAcross = 546;
+const padDiameter = 0.8 * SIZE;
+const imprintGeo = new THREE.PlaneGeometry(
+  padDiameter * (1200 / inkAcross),
+  padDiameter * (630 / inkAcross),
+);
+const imprintMat = new THREE.MeshBasicMaterial({
+  map: imprintMap,
+  transparent: true,
+  depthWrite: false,
+  toneMapped: false,
+});
+let stamped = false;
+let imprintLift = 0;
+
+function leaveImprint() {
+  const mark = new THREE.Mesh(imprintGeo, imprintMat);
+  mark.rotation.x = -Math.PI / 2;
+  imprintLift += 1;
+  mark.position.set(land.x, 0.006 + imprintLift * 0.0003, land.z);
+  mark.renderOrder = imprintLift;
+  scene.add(mark);
+}
+
 const file = new URLSearchParams(location.search).get('file') || 'models/stamp_round.glb';
 const gltf = await new GLTFLoader().loadAsync(file);
 const model = gltf.scene;
@@ -152,6 +180,10 @@ function pose(now) {
   const t = now - startedAt;
   const lx = land.x;
   const lz = land.z;
+  if (!stamped && t >= ENTER + DROP) {
+    stamped = true;
+    leaveImprint();
+  }
 
   if (t < ENTER) {
     const k = easeInOut(t / ENTER);
@@ -246,6 +278,7 @@ function onPointerUp(e) {
   if (!hit) return;
   land.x = hit.x;
   land.z = hit.z;
+  stamped = false;
   playing = true;
   startedAt = performance.now();
   hint.textContent = '';
