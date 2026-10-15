@@ -15,6 +15,7 @@
     --blue-on: #e1e1e1;
     --grotesk: Arial, "Helvetica Neue", Helvetica, sans-serif;
     --k: calc(100vw / 1440);
+    --u: calc(100vh / 800);
   }
 
   * { box-sizing: border-box; }
@@ -173,6 +174,225 @@
     font-size: calc(14 * var(--k));
   }
   .quiet a { color: var(--blue); }
+
+  /* Маршрут #/board: колонка кадра 15:1144. Хедер фиксирован и прозрачен.
+     Каждая полоса 4087×800 листается горизонтально, страница — вертикально. */
+  body[data-route="board"] {
+    --u: var(--k);
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  body[data-route="board"] #stage {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .reel {
+    position: relative;
+    z-index: 2;
+    padding: calc(12 * var(--k)) calc(12 * var(--k)) 0;
+  }
+
+  .lockup {
+    position: relative;
+    height: calc(239.978 * var(--k));
+    margin: 0 calc(-12 * var(--k)) calc(88 * var(--k));
+  }
+  .lockup > * { position: absolute; }
+  .lockup .mark { pointer-events: none; }
+  .lockup .mark-vanok {
+    left: calc(705.001 * var(--k));
+    top: 0;
+    width: calc(345.773 * var(--k));
+    height: calc(239.978 * var(--k));
+  }
+  .lockup .mark-regular {
+    left: calc(953.384 * var(--k));
+    top: calc(36.672 * var(--k));
+    width: calc(474.616 * var(--k));
+    height: calc(199.741 * var(--k));
+  }
+
+  .reel .case {
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(6 * var(--k));
+  }
+  .reel .case + .case,
+  .reel .signoff { margin-top: calc(160 * var(--k)); }
+
+  .reel .case-meta {
+    display: flex;
+    gap: calc(12 * var(--k));
+    align-items: center;
+    margin: 0;
+    max-width: none;
+    height: calc(16 * var(--k));
+    font-size: calc(14 * var(--k));
+    line-height: normal;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+  .case-meta span:nth-child(1) { width: calc(107 * var(--k)); flex: none; }
+  .case-meta span:nth-child(2) { width: calc(583 * var(--k)); flex: none; }
+  .case-meta span:nth-child(3) { width: calc(464 * var(--k)); flex: none; }
+  .case-meta .full {
+    width: calc(226 * var(--k));
+    flex: none;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.15em;
+  }
+
+  .scroller {
+    width: 100vw;
+    max-width: none;
+    margin-left: calc(-12 * var(--k));
+    margin-right: calc(-12 * var(--k));
+    height: calc(800 * var(--u));
+    overflow: hidden;
+    scrollbar-width: none;
+    cursor: grab;
+    overscroll-behavior-x: none;
+  }
+  .scroller::-webkit-scrollbar { display: none; }
+  .scroller.is-drag { cursor: grabbing; }
+
+  .track {
+    display: flex;
+    height: 100%;
+    width: max-content;
+  }
+
+  .board {
+    position: relative;
+    flex: none;
+    width: calc(4087 * var(--u));
+    height: calc(800 * var(--u));
+    background: #d7d7d7;
+    overflow: hidden;
+  }
+
+  .bar {
+    position: absolute;
+    top: 0;
+    width: calc(76 * var(--u));
+    height: 100%;
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  .piece { position: absolute; overflow: hidden; }
+  .piece.dark { background: #000; }
+  .piece img {
+    position: absolute;
+    display: block;
+    max-width: none;
+  }
+  .piece .cover { inset: 0; width: 100%; height: 100%; }
+  .loose {
+    position: absolute;
+    display: block;
+    max-width: none;
+    object-fit: fill;
+    pointer-events: none;
+  }
+  .cover { object-fit: cover; }
+  .flip { transform: scaleX(-1); }
+  .board img, .board video { -webkit-user-drag: none; user-select: none; }
+  .board video { background: transparent; }
+
+  .signoff {
+    height: calc(480 * var(--k));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(5 * var(--k));
+    color: var(--blue);
+    font-size: calc(14 * var(--k));
+  }
+  .signoff p { margin: 0; }
+  .sign-lines { display: flex; gap: calc(12 * var(--k)); }
+  .sign-lines i {
+    display: block;
+    width: calc(226 * var(--k));
+    border-top: 1px solid currentColor;
+  }
+
+  .chrome.strip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    overflow: visible;
+    z-index: 5;
+    pointer-events: none;
+    background: none;
+  }
+  .chrome.strip a { pointer-events: auto; z-index: 1; }
+  .chrome.strip .crosshair {
+    left: calc(12 * var(--k));
+    top: calc(8 * var(--k));
+    width: calc(19.997 * var(--k));
+    height: calc(19.997 * var(--k));
+  }
+  .chrome.strip .crosshair img {
+    position: absolute;
+    left: -3.85%;
+    top: -3.85%;
+    width: 107.7%;
+    height: 107.7%;
+    max-width: none;
+  }
+  .chrome.strip .nav-text {
+    font-size: calc(14 * var(--k));
+    line-height: normal;
+  }
+  .chrome.strip .tagline {
+    left: calc(131 * var(--k));
+    top: calc(10 * var(--k));
+    transform: none;
+    text-align: left;
+  }
+  .chrome.strip .nav-index {
+    left: calc(726 * var(--k));
+    top: calc(10 * var(--k));
+  }
+  .chrome.strip .nav-sandbox {
+    left: calc(1202 * var(--k));
+    top: calc(10 * var(--k));
+  }
+  .chrome.strip .nav-about {
+    left: calc(1391 * var(--k));
+    top: calc(10 * var(--k));
+    transform: none;
+  }
+  .chrome.strip .mark,
+  .chrome.strip .peek { pointer-events: none; }
+  .chrome.strip .mark-vanok {
+    left: calc(726 * var(--k));
+    top: calc(12 * var(--k));
+    width: calc(334.773 * var(--k));
+    height: calc(232.344 * var(--k));
+  }
+  .chrome.strip .mark-regular {
+    left: calc(966.484 * var(--k));
+    top: calc(47.5 * var(--k));
+    width: calc(459.513 * var(--k));
+    height: calc(193.387 * var(--k));
+  }
+  .chrome.strip .peek {
+    left: calc(1257 * var(--k));
+    top: calc(-77 * var(--k));
+    width: calc(161 * var(--k));
+    height: calc(140 * var(--k));
+    object-fit: fill;
+  }
 </style>
 </head>
 <body>
@@ -215,6 +435,25 @@ const chrome = (mode, current) => {
   `;
 };
 
+function stripeBars() {
+  return Array.from({ length: 13 }, (_, i) => {
+    const x = 220 + i * 296;
+    return `<i class="bar" style="left: calc(${x} * var(--u))"></i>`;
+  }).join('');
+}
+
+function shot(src, alt, x, y, w, h, cls = 'cover') {
+  const classes = cls ? `loose ${cls}` : 'loose';
+  return `<img class="${classes}" alt="${alt}" src="design/board/${src}" style="left: calc(${x} * var(--u)); top: calc(${y} * var(--u)); width: calc(${w} * var(--u)); height: calc(${h} * var(--u))">`;
+}
+
+function caseBand(num, title, year, shots) {
+  return `<section class="case">
+    <p class="case-meta"><span>${num}</span><span>${title}</span><span>${year}</span><span class="full">Full case</span></p>
+    <div class="scroller"><div class="track"><div class="board">${stripeBars()}${shots}</div></div></div>
+  </section>`;
+}
+
 const TEMPLATES = {
   hero: () => `
     <header class="chrome mid">${chrome('mid', 'hero')}</header>
@@ -253,7 +492,99 @@ const TEMPLATES = {
       <p>A graphic world for an artist’s release with millions of listens — identity, type and art direction.</p>
       <p>Belgrad, Serbia. Available for commissions.</p>
     </section>
-    <p class="quiet"><a href="viewer.html">model viewer</a></p>
+    <p class="quiet"><a href="#/board">board</a> · <a href="viewer.html">model viewer</a></p>
+  `,
+  board: () => `
+    <header class="chrome strip">
+      <img class="peek" src="design/assets/header-peek.png" alt="">
+      <a class="crosshair" href="#/"><img src="design/assets/crosshair-frame.svg" alt=""></a>
+      <p class="nav-text tagline">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
+      <a class="nav-text nav-index" href="#/index">Index</a>
+      <a class="nav-text nav-sandbox" href="#/board" aria-current="page">Sandbox</a>
+      <a class="nav-text nav-about" href="#/about">About</a>
+    </header>
+    <div class="reel">
+      <div class="lockup">
+        <img class="mark mark-vanok" src="design/assets/wordmark-vanok-frame.svg" alt="Vanök">
+        <img class="mark mark-regular" src="design/assets/wordmark-regular-frame.svg" alt="Regular">
+      </div>
+      <section class="case">
+        <p class="case-meta"><span>01</span><span>Wild Ea$t album identity for SALUKI</span><span>2024</span><span class="full">Full case</span></p>
+        <div class="scroller">
+          <div class="track">
+            <div class="board">
+              ${stripeBars()}
+          <div class="piece dark" style="left: calc(2047.844 * var(--u)); top: calc(477 * var(--u)); width: calc(340.825 * var(--u)); height: calc(323.057 * var(--u))">
+            <img alt="Wild East vinyl" src="design/board/shot-2215.png" style="left: calc(-134.555 * var(--u)); top: 0; width: calc(609.935 * var(--u)); height: calc(340.825 * var(--u))">
+          </div>
+          <video class="loose cover" src="design/board/vedma-2.mp4" autoplay muted loop playsinline style="left: calc(1499 * var(--u)); top: calc(373.313 * var(--u)); width: calc(346.966 * var(--u)); height: calc(231.822 * var(--u))"></video>
+          <div class="piece dark" style="left: calc(1214 * var(--u)); top: 0; width: calc(346.294 * var(--u)); height: calc(346.294 * var(--u))">
+            <img alt="Two figures against a pale wall" src="design/board/shot-2230.png" style="left: 0; top: calc(-14.078 * var(--u)); width: calc(346.294 * var(--u)); height: calc(387.417 * var(--u))">
+            <img alt="" src="design/board/logo-b.svg" style="left: 31.53%; top: 65.25%; width: 8.36%; height: 9.09%">
+            <img alt="" src="design/board/logo-c.svg" style="left: 44.78%; top: 65.77%; width: 10.4%; height: 8.8%">
+            <img alt="" src="design/board/logo-a.svg" style="left: 60.09%; top: 65.26%; width: 8.33%; height: 9.05%">
+            <img alt="" src="design/board/logo-d.svg" style="left: 9.01%; top: 25.47%; width: 81.93%; height: 25.32%">
+          </div>
+          <img class="loose cover" alt="Embroidered caps" src="design/board/photo-1121.png" style="left: calc(1879 * var(--u)); top: 0; width: calc(346.659 * var(--u)); height: calc(433.324 * var(--u))">
+          <video class="loose cover" src="design/board/vedma.mp4" autoplay muted loop playsinline style="left: calc(2868 * var(--u)); top: 0; width: calc(735 * var(--u)); height: calc(496 * var(--u))"></video>
+          <div class="piece" style="left: calc(3193 * var(--u)); top: calc(610 * var(--u)); width: calc(205 * var(--u)); height: calc(190 * var(--u))">
+            <img alt="Rider" src="design/board/poster-11.png" style="left: 0; top: -0.38%; width: 99.79%; height: 118.97%">
+          </div>
+          <div class="piece" style="left: calc(3681 * var(--u)); top: calc(500 * var(--u)); width: calc(340 * var(--u)); height: calc(300 * var(--u))">
+            <img alt="Blister pack with flowers" src="design/board/poster-09.png" style="left: -0.02%; top: 0; width: 100.04%; height: 119%">
+          </div>
+          <div class="piece dark" style="left: calc(2244.383 * var(--u)); top: 0; width: calc(343.896 * var(--u)); height: calc(275.428 * var(--u))">
+            <img class="cover" alt="Portrait in a red headscarf" src="design/board/poster-15.png">
+          </div>
+          <img class="loose flip" alt="" src="design/board/vector-2.png" style="left: calc(2817.326 * var(--u)); top: calc(605 * var(--u)); width: calc(112.053 * var(--u)); height: calc(191.494 * var(--u))">
+          <img class="loose" alt="Pair of socks" src="design/board/vector-1.png" style="left: calc(2744.561 * var(--u)); top: calc(609.18 * var(--u)); width: calc(144.666 * var(--u)); height: calc(198.184 * var(--u))">
+          <img class="loose cover" alt="Ceramic plate" src="design/board/layer-18.png" style="left: calc(2541 * var(--u)); top: calc(610.156 * var(--u)); width: calc(176.268 * var(--u)); height: calc(179.915 * var(--u))">
+          <video class="loose cover" src="design/board/ventonyl.webm" autoplay muted loop playsinline style="left: calc(-189 * var(--u)); top: calc(-67.789 * var(--u)); width: calc(718.981 * var(--u)); height: calc(650.507 * var(--u))"></video>
+          <video class="loose cover" src="design/board/jacket.webm" autoplay muted loop playsinline style="left: calc(-0.172 * var(--u)); top: calc(539.797 * var(--u)); width: calc(346.966 * var(--u)); height: calc(219.54 * var(--u))"></video>
+          <img class="loose cover" alt="Calligraphy over a crowd" src="design/board/we.png" style="left: calc(365.227 * var(--u)); top: 0; width: calc(712.355 * var(--u)); height: calc(712.355 * var(--u))">
+            </div>
+          </div>
+        </div>
+      </section>
+      ${caseBand('02', 'identity, titles, font, lettering, logo, vinyl and poster for Glukoza', '2026', [
+        shot('glu-artbook.png', 'Glukoza artbook', -24, 236, 1226, 613),
+        shot('glu-mark.svg', '', 1404, 0, 214.156, 306.217, ''),
+        shot('glu-poster.png', 'Glukoza listening poster', 3685, 0, 402, 569),
+        shot('glu-8933.png', '', 1680, 0, 802, 800),
+        shot('glu-0118.png', '', 2557, 288, 514, 512),
+        shot('glu-0115.png', '', 3256, 0, 367, 367),
+      ].join(''))}
+      ${caseBand('03', 'Created Kaik is an educational playground for graphic designers', '2026', [
+        shot('kaik-word.svg', 'Created Kaik', 58, 37, 863, 116, ''),
+        shot('kaik-photo.png', '', 1776, 0, 418, 624),
+        shot('kaik-photo.png', '', 2194, 0, 418, 624, 'cover flip'),
+        shot('kaik-1.png', '', 3772, 0, 314, 419),
+        shot('kaik-2.png', '', 220, 440, 270, 360),
+        shot('kaik-3.png', '', 2960, 194, 454, 606),
+        shot('kaik-group.svg', '', 2360, 86, 532.902, 673.717, ''),
+        shot('kaik-corner.svg', '', 3631, 585, 358.689, 200, ''),
+        shot('kaik-dog.svg', '', 572.01, 202, 1354.68, 627.538, ''),
+      ].join(''))}
+      ${caseBand('04', 'Font, logo, posters and merch for Feduk', '2026', [
+        shot('feduk-a.png', '', 296, 452, 246.996, 348.189),
+        shot('feduk-b.png', '', 0, 0, 348.189, 348.189),
+        shot('feduk-shirt.png', '', 592, 0, 554, 554),
+        shot('feduk-c.png', '', 1911, -27, 456.998, 456.998),
+        shot('feduk-09.png', '', 1184, 245, 549.213, 309.018),
+        shot('feduk-04.png', '', 3552, 0, 414, 591),
+        shot('feduk-12.png', '', 2664, 0, 560, 800),
+      ].join(''))}
+      ${caseBand('04', 'Titles, lettering, posters for Sub Urban', '2026', [
+        shot('sub-08.png', '', 0, 0, 472, 629),
+        shot('sub-02.png', '', 1600, 0, 472, 629),
+        shot('sub-06.png', '', 3552, 36, 472, 629),
+        shot('sub-04.png', '', 2251, 171, 472, 629),
+      ].join(''))}
+      <div class="signoff">
+        <div class="sign-lines"><i></i><i></i><i></i><i></i></div>
+        <p>sign here</p>
+      </div>
+    </div>
   `,
 };
 
@@ -261,6 +592,7 @@ function parseRoute() {
   const raw = (location.hash || '').replace(/^#/, '').replace(/^\//, '');
   if (raw === 'index') return 'index';
   if (raw === 'about') return 'about';
+  if (raw === 'board') return 'board';
   return 'hero';
 }
 
@@ -275,6 +607,7 @@ function heroAnchor() {
 function anchorFor(name) {
   if (name === 'index') return { fx: 0.5, fy: 0.7 };
   if (name === 'about') return { fx: 0.7, fy: 0.58 };
+  if (name === 'board') return { fx: 0.88, fy: 0.12 };
   return heroAnchor();
 }
 
@@ -283,10 +616,146 @@ let phase = 'rest';
 let fx = 0.5, fy = 0.3, destFx = fx, destFy = fy;
 let vy = 0, e = 0.64, flyT = 0;
 let yaw = 0, yawVel = 0;
+let dragYaw = 0, dragPitch = 0;
+let grab = null;
+
+const STRIP_SPEED = 30;
+const STRIP_W = 4087;
+let unmountStrip = null;
+
+function mountStrip(root) {
+  const stops = [...root.querySelectorAll('.scroller')].map((scroller, index) => mountScroller(scroller, index));
+  return () => stops.forEach((stop) => stop());
+}
+
+function mountScroller(scroller, index) {
+  const board = scroller.querySelector('.board');
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  // Odd bands: pictures travel right → left (scrollLeft grows).
+  // Even bands: pictures travel left → right (scrollLeft shrinks).
+  const dir = index % 2 === 0 ? 1 : -1;
+  let alive = true;
+  let drag = null;
+  let wrapping = false;
+  let primed = dir > 0;
+
+  function park(next) {
+    const loop = loopWidth();
+    if (loop > 0) next = ((next % loop) + loop) % loop;
+    wrapping = true;
+    scroller.scrollLeft = next;
+    wrapping = false;
+  }
+
+  function loopWidth() {
+    return board.getBoundingClientRect().width;
+  }
+
+  function ensureCopies() {
+    if (!alive) return;
+    const loop = loopWidth();
+    if (loop <= 0) return;
+    const need = Math.max(2, Math.ceil(scroller.clientWidth / loop) + 1);
+    const track = board.parentElement;
+    while (track.children.length < need) {
+      const copy = board.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');
+      track.appendChild(copy);
+      copy.querySelectorAll('video').forEach((video) => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    }
+  }
+
+  function wrap() {
+    const loop = loopWidth();
+    if (loop <= 0 || wrapping) return;
+    const x = scroller.scrollLeft;
+    if (x >= loop) {
+      wrapping = true;
+      scroller.scrollLeft = x - loop;
+      wrapping = false;
+    } else if (x < 0) {
+      wrapping = true;
+      scroller.scrollLeft = x + loop;
+      wrapping = false;
+    }
+  }
+
+  function onWheel(event) {
+    const horizontal = event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY);
+    if (horizontal) event.preventDefault();
+  }
+
+  function onScroll() {
+    if (!wrapping) wrap();
+  }
+
+  function onDown(event) {
+    if (event.button !== 0) return;
+    drag = { x: event.clientX, left: scroller.scrollLeft };
+    scroller.classList.add('is-drag');
+    try { scroller.setPointerCapture(event.pointerId); } catch (err) { /* synthetic */ }
+  }
+
+  function onMove(event) {
+    if (!drag) return;
+    const loop = loopWidth();
+    let next = drag.left - (event.clientX - drag.x);
+    if (loop > 0) next = ((next % loop) + loop) % loop;
+    scroller.scrollLeft = next;
+  }
+
+  function onUp() {
+    drag = null;
+    scroller.classList.remove('is-drag');
+  }
+
+  ensureCopies();
+  board.querySelectorAll('video').forEach((video) => {
+    video.muted = true;
+    video.play().catch(() => {});
+  });
+  addEventListener('resize', ensureCopies);
+  scroller.addEventListener('wheel', onWheel, { passive: false });
+  scroller.addEventListener('scroll', onScroll, { passive: true });
+  scroller.addEventListener('pointerdown', onDown);
+  scroller.addEventListener('pointermove', onMove);
+  scroller.addEventListener('pointerup', onUp);
+  scroller.addEventListener('pointercancel', onUp);
+
+  let last = performance.now();
+  function tick(now) {
+    if (!alive) return;
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const loop = loopWidth();
+    if (loop > 0 && !primed) {
+      primed = true;
+      park(loop);
+    }
+    if (!motion.matches && !drag && loop > 0) {
+      park(scroller.scrollLeft + dir * STRIP_SPEED * (loop / STRIP_W) * dt);
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  return () => {
+    alive = false;
+    removeEventListener('resize', ensureCopies);
+  };
+}
 
 function paint(name) {
+  if (unmountStrip) {
+    unmountStrip();
+    unmountStrip = null;
+  }
   document.body.dataset.route = name;
   app.innerHTML = TEMPLATES[name]();
+  if (name === 'board') unmountStrip = mountStrip(app);
 }
 
 function nearestTurn(target, current) {
@@ -402,10 +871,20 @@ const aim = new THREE.Group();
 spin.add(aim);
 scene.add(spin);
 
+const SKIN = { color: 0xaaff28, emissive: 0xb4f040, emissiveIntensity: 0.1, metalness: 0, roughness: 0.42 };
+const STEM = { color: 0x7a4e28, emissive: 0x000000, emissiveIntensity: 0, metalness: 0, roughness: 0.64 };
+const LEAF = { color: 0x2f861f, emissive: 0x14300a, emissiveIntensity: 0.18, metalness: 0, roughness: 0.52 };
+const FLESH = { color: 0xf6e0b8, emissive: 0xf0d0a0, emissiveIntensity: 0.08, metalness: 0, roughness: 0.62 };
+const SEED = { color: 0x6b3a22, emissive: 0x2a140c, emissiveIntensity: 0.04, metalness: 0, roughness: 0.5 };
 const LOOK = {
-  PaleGreen: { color: 0xaaff28, emissive: 0xb4f040, emissiveIntensity: 0.1, metalness: 0, roughness: 0.42 },
-  DarkBrown: { color: 0x7a4e28, emissive: 0x000000, emissiveIntensity: 0, metalness: 0, roughness: 0.64 },
-  DarkGreen: { color: 0x2f861f, emissive: 0x14300a, emissiveIntensity: 0.18, metalness: 0, roughness: 0.52 },
+  PaleGreen: SKIN,
+  green: SKIN,
+  DarkBrown: STEM,
+  brown: STEM,
+  _defaultMat: STEM,
+  DarkGreen: LEAF,
+  brownLight: FLESH,
+  brownDark: SEED,
 };
 
 function materialsOf(mesh) {
@@ -451,9 +930,15 @@ function paintApple(root) {
       m.emissiveIntensity = look.emissiveIntensity;
       m.metalness = look.metalness;
       m.roughness = look.roughness;
-      m.envMapIntensity = m.name === 'PaleGreen' ? 0.22 : 0.12;
+      const skin = m.name === 'PaleGreen' || m.name === 'green';
+      m.envMapIntensity = skin ? 0.22 : 0.12;
       m.side = m.name === 'DarkGreen' ? THREE.DoubleSide : THREE.FrontSide;
       m.flatShading = false;
+      if (m.name === 'brownDark') {
+        m.polygonOffset = true;
+        m.polygonOffsetFactor = -2;
+        m.polygonOffsetUnits = -2;
+      }
       m.needsUpdate = true;
     }
   });
@@ -516,26 +1001,48 @@ let ready = false;
 let shadeStats = null;
 let bodyMat = null;
 
-const gltf = await new GLTFLoader().loadAsync('models/apple_green_quaternius.glb');
+function worldNormal(mesh) {
+  const attr = mesh.geometry.attributes.normal;
+  const n = new THREE.Vector3();
+  const tmp = new THREE.Vector3();
+  for (let i = 0; i < attr.count; i++) n.add(tmp.fromBufferAttribute(attr, i));
+  mesh.updateWorldMatrix(true, false);
+  return n.transformDirection(mesh.matrixWorld).normalize();
+}
+
+// Половинка Kenney: кожура с одной стороны, плоский срез (мякоть и семечки) с другой.
+const gltf = await new GLTFLoader().loadAsync('models/apple_half_green.glb');
 const model = gltf.scene;
 shadeStats = smoothShade(model);
 paintApple(model);
 
-const body = meshByMaterial(model, 'PaleGreen');
-const stem = meshByMaterial(model, 'DarkBrown');
+const body = meshByMaterial(model, 'green');
+const stem = meshByMaterial(model, 'brown');
+const flesh = meshByMaterial(model, 'brownLight');
 const leaf = meshByMaterial(model, 'DarkGreen');
-bodyMat = materialsOf(body).find((m) => m.name === 'PaleGreen');
+bodyMat = materialsOf(body).find((m) => m.name === 'green');
 
 aim.add(model);
 spin.updateMatrixWorld(true);
 
-// Черенок — к камере (+Y). Камера стоит над яблоком и смотрит вниз.
-const stemDir = centerOf(stem).sub(centerOf(body));
-if (stemDir.lengthSq() > 1e-8) {
-  model.quaternion.setFromUnitVectors(stemDir.normalize(), new THREE.Vector3(0, 1, 0));
+// Срез смотрит в камеру (+Y), черенок — вверх кадра (+Z).
+{
+  const cutN = worldNormal(flesh);
+  const stemDir = centerOf(stem).sub(centerOf(body));
+  if (cutN.lengthSq() > 1e-8 && stemDir.lengthSq() > 1e-8) {
+    const qCut = new THREE.Quaternion().setFromUnitVectors(cutN, new THREE.Vector3(0, 1, 0));
+    const stemFlat = stemDir.normalize().applyQuaternion(qCut);
+    stemFlat.y = 0;
+    if (stemFlat.lengthSq() > 1e-8) {
+      const qStem = new THREE.Quaternion().setFromUnitVectors(stemFlat.normalize(), new THREE.Vector3(0, 0, 1));
+      model.quaternion.copy(qStem.multiply(qCut));
+    } else {
+      model.quaternion.copy(qCut);
+    }
+  }
 }
 spin.updateMatrixWorld(true);
-faceLeafToCamera(leaf, centerOf(body));
+if (leaf) faceLeafToCamera(leaf, centerOf(body));
 
 // Масштаб: диаметр тела = 1. Центр тела — в начале координат.
 {
@@ -548,15 +1055,9 @@ faceLeafToCamera(leaf, centerOf(body));
 }
 spin.updateMatrixWorld(true);
 
-// Лист в верхний левый квадрант, как на макете. Вращение только вокруг Y —
-// верх яблока остаётся к камере.
-{
-  const rel = centerOf(leaf).sub(centerOf(body));
-  const current = Math.atan2(rel.z, rel.x);
-  const desired = Math.atan2(0.68, -0.55);
-  // Положительный rotation.y уменьшает atan2(z, x), поэтому знак такой.
-  aim.rotation.y = current - desired;
-}
+// Чуть в три четверти: плоскость среза к зрителю, с краю видна кожура.
+aim.rotation.x = 0.2;
+aim.rotation.z = -0.5;
 spin.updateMatrixWorld(true);
 
 function resize() {
@@ -639,8 +1140,56 @@ function step(dt) {
     shadow.scale.setScalar(4.1);
     shadowMat.opacity = 0.48;
   }
-  spin.rotation.set(0, yaw, 0);
+  const scrollQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+  const pitchQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), dragPitch);
+  const turnQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), dragYaw);
+  spin.quaternion.copy(turnQ).multiply(pitchQ).multiply(scrollQ);
 }
+
+const raycaster = new THREE.Raycaster();
+const pointerNdc = new THREE.Vector2();
+
+function overInteractive(event) {
+  const t = event.target;
+  return t instanceof Element && !!t.closest('a, button, input, textarea, select, summary, label, .scroller');
+}
+
+function pointerHitsApple(event) {
+  pointerNdc.set((event.clientX / innerWidth) * 2 - 1, -(event.clientY / innerHeight) * 2 + 1);
+  raycaster.setFromCamera(pointerNdc, camera);
+  return raycaster.intersectObject(model, true).length > 0;
+}
+
+addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || !ready) return;
+  if (overInteractive(event)) return;
+  if (!pointerHitsApple(event)) return;
+  grab = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  document.body.style.cursor = 'grabbing';
+  event.preventDefault();
+});
+
+addEventListener('pointermove', (event) => {
+  if (grab && event.pointerId === grab.id) {
+    const dx = event.clientX - grab.x;
+    const dy = event.clientY - grab.y;
+    grab.x = event.clientX;
+    grab.y = event.clientY;
+    dragYaw += dx * 0.012;
+    dragPitch = Math.max(-1.35, Math.min(1.35, dragPitch + dy * 0.012));
+    return;
+  }
+  if (grab) return;
+  document.body.style.cursor = !overInteractive(event) && pointerHitsApple(event) ? 'grab' : '';
+});
+
+function endGrab(event) {
+  if (!grab || event.pointerId !== grab.id) return;
+  grab = null;
+  document.body.style.cursor = '';
+}
+addEventListener('pointerup', endGrab);
+addEventListener('pointercancel', endGrab);
 
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
@@ -663,10 +1212,12 @@ globalThis.__apple = {
     route,
     phase,
     fx, fy, vy, yaw, yawVel, e,
+    dragYaw, dragPitch,
     shade: shadeStats,
+    model: 'models/apple_half_green.glb',
     body: col.getStyle(),
-    stem: materialsOf(stem).find((m) => m.name === 'DarkBrown').color.getStyle(),
-    leaf: materialsOf(leaf).find((m) => m.name === 'DarkGreen').color.getStyle(),
+    stem: materialsOf(stem).find((m) => m.name === 'brown').color.getStyle(),
+    flesh: materialsOf(flesh).find((m) => m.name === 'brownLight').color.getStyle(),
     scrollY,
   }),
 };
