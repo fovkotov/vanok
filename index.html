@@ -93,6 +93,8 @@
   .chrome.top .mark-regular { top: calc(36 * var(--k)); }
 
   a[aria-current="page"] { text-decoration: underline; text-underline-offset: 3px; }
+  a.nav-sandbox,
+  a.nav-sandbox[aria-current="page"] { text-decoration: none; }
 
   .sheet {
     min-height: 100vh;
@@ -246,7 +248,14 @@
     flex: none;
     text-decoration: underline dotted;
     text-underline-offset: 0.15em;
+    cursor: pointer;
   }
+  .scroller .full,
+  .scroller a,
+  .scroller button,
+  .scroller.is-drag .full,
+  .scroller.is-drag a,
+  .scroller.is-drag button { cursor: pointer; }
 
   .scroller {
     width: 100vw;
@@ -306,17 +315,33 @@
   .board video { background: transparent; }
 
   .signoff {
-    height: calc(480 * var(--k));
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    margin-left: calc(-12 * var(--k));
+    margin-right: calc(-12 * var(--k));
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: calc(5 * var(--k));
+    background: var(--bg);
     color: var(--blue);
     font-size: calc(14 * var(--k));
+    cursor: pointer;
+    user-select: none;
   }
-  .signoff p { margin: 0; }
-  .sign-lines { display: flex; gap: calc(12 * var(--k)); }
+  .signoff.is-placed { cursor: default; }
+  .signoff .sign-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .signoff p { margin: 0; position: relative; z-index: 1; }
+  .sign-lines { display: flex; gap: calc(12 * var(--k)); position: relative; z-index: 1; }
   .sign-lines i {
     display: block;
     width: calc(226 * var(--k));
@@ -387,12 +412,37 @@
     height: calc(193.387 * var(--k));
   }
   .chrome.strip .peek {
-    left: calc(1257 * var(--k));
-    top: calc(-77 * var(--k));
-    width: calc(161 * var(--k));
-    height: calc(140 * var(--k));
-    object-fit: fill;
+    left: calc(1220 * var(--k));
+    top: 0;
+    width: calc(255 * var(--k));
+    height: calc(306 * var(--k));
+    overflow: visible;
   }
+  .chrome.strip .peek canvas { display: block; width: 100%; height: 100%; }
+  .apple-readout {
+    position: fixed;
+    z-index: 6;
+    left: calc(1088 * var(--k));
+    top: calc(168 * var(--k));
+    margin: 0;
+    padding: 4px 8px;
+    background: var(--bg);
+    color: #111;
+    font-family: var(--grotesk);
+    font-size: max(20px, calc(26 * var(--k)));
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: pre;
+    pointer-events: none;
+    user-select: none;
+  }
+  .band-drop {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+  }
+  .band-drop canvas { display: block; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
@@ -496,7 +546,7 @@ const TEMPLATES = {
   `,
   board: () => `
     <header class="chrome strip">
-      <img class="peek" src="design/assets/header-peek.png" alt="">
+      <div class="peek" aria-hidden="true"></div>
       <a class="crosshair" href="#/"><img src="design/assets/crosshair-frame.svg" alt=""></a>
       <p class="nav-text tagline">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
       <a class="nav-text nav-index" href="#/index">Index</a>
@@ -515,70 +565,70 @@ const TEMPLATES = {
             <div class="board">
               ${stripeBars()}
           <div class="piece dark" style="left: calc(2047.844 * var(--u)); top: calc(477 * var(--u)); width: calc(340.825 * var(--u)); height: calc(323.057 * var(--u))">
-            <img alt="Wild East vinyl" src="design/board/shot-2215.png" style="left: calc(-134.555 * var(--u)); top: 0; width: calc(609.935 * var(--u)); height: calc(340.825 * var(--u))">
+            <img alt="Wild East vinyl" src="design/board/shot-2215.webp" style="left: calc(-134.555 * var(--u)); top: 0; width: calc(609.935 * var(--u)); height: calc(340.825 * var(--u))">
           </div>
           <video class="loose cover" src="design/board/vedma-2.mp4" autoplay muted loop playsinline style="left: calc(1499 * var(--u)); top: calc(373.313 * var(--u)); width: calc(346.966 * var(--u)); height: calc(231.822 * var(--u))"></video>
           <div class="piece dark" style="left: calc(1214 * var(--u)); top: 0; width: calc(346.294 * var(--u)); height: calc(346.294 * var(--u))">
-            <img alt="Two figures against a pale wall" src="design/board/shot-2230.png" style="left: 0; top: calc(-14.078 * var(--u)); width: calc(346.294 * var(--u)); height: calc(387.417 * var(--u))">
+            <img alt="Two figures against a pale wall" src="design/board/shot-2230.webp" style="left: 0; top: calc(-14.078 * var(--u)); width: calc(346.294 * var(--u)); height: calc(387.417 * var(--u))">
             <img alt="" src="design/board/logo-b.svg" style="left: 31.53%; top: 65.25%; width: 8.36%; height: 9.09%">
             <img alt="" src="design/board/logo-c.svg" style="left: 44.78%; top: 65.77%; width: 10.4%; height: 8.8%">
             <img alt="" src="design/board/logo-a.svg" style="left: 60.09%; top: 65.26%; width: 8.33%; height: 9.05%">
             <img alt="" src="design/board/logo-d.svg" style="left: 9.01%; top: 25.47%; width: 81.93%; height: 25.32%">
           </div>
-          <img class="loose cover" alt="Embroidered caps" src="design/board/photo-1121.png" style="left: calc(1879 * var(--u)); top: 0; width: calc(346.659 * var(--u)); height: calc(433.324 * var(--u))">
+          <img class="loose cover" alt="Embroidered caps" src="design/board/photo-1121.webp" style="left: calc(1879 * var(--u)); top: 0; width: calc(346.659 * var(--u)); height: calc(433.324 * var(--u))">
           <video class="loose cover" src="design/board/vedma.mp4" autoplay muted loop playsinline style="left: calc(2868 * var(--u)); top: 0; width: calc(735 * var(--u)); height: calc(496 * var(--u))"></video>
           <div class="piece" style="left: calc(3193 * var(--u)); top: calc(610 * var(--u)); width: calc(205 * var(--u)); height: calc(190 * var(--u))">
-            <img alt="Rider" src="design/board/poster-11.png" style="left: 0; top: -0.38%; width: 99.79%; height: 118.97%">
+            <img alt="Rider" src="design/board/poster-11.webp" style="left: 0; top: -0.38%; width: 99.79%; height: 118.97%">
           </div>
           <div class="piece" style="left: calc(3681 * var(--u)); top: calc(500 * var(--u)); width: calc(340 * var(--u)); height: calc(300 * var(--u))">
-            <img alt="Blister pack with flowers" src="design/board/poster-09.png" style="left: -0.02%; top: 0; width: 100.04%; height: 119%">
+            <img alt="Blister pack with flowers" src="design/board/poster-09.webp" style="left: -0.02%; top: 0; width: 100.04%; height: 119%">
           </div>
           <div class="piece dark" style="left: calc(2244.383 * var(--u)); top: 0; width: calc(343.896 * var(--u)); height: calc(275.428 * var(--u))">
-            <img class="cover" alt="Portrait in a red headscarf" src="design/board/poster-15.png">
+            <img class="cover" alt="Portrait in a red headscarf" src="design/board/poster-15.webp">
           </div>
-          <img class="loose flip" alt="" src="design/board/vector-2.png" style="left: calc(2817.326 * var(--u)); top: calc(605 * var(--u)); width: calc(112.053 * var(--u)); height: calc(191.494 * var(--u))">
-          <img class="loose" alt="Pair of socks" src="design/board/vector-1.png" style="left: calc(2744.561 * var(--u)); top: calc(609.18 * var(--u)); width: calc(144.666 * var(--u)); height: calc(198.184 * var(--u))">
-          <img class="loose cover" alt="Ceramic plate" src="design/board/layer-18.png" style="left: calc(2541 * var(--u)); top: calc(610.156 * var(--u)); width: calc(176.268 * var(--u)); height: calc(179.915 * var(--u))">
+          <img class="loose flip" alt="" src="design/board/vector-2.webp" style="left: calc(2817.326 * var(--u)); top: calc(605 * var(--u)); width: calc(112.053 * var(--u)); height: calc(191.494 * var(--u))">
+          <img class="loose" alt="Pair of socks" src="design/board/vector-1.webp" style="left: calc(2744.561 * var(--u)); top: calc(609.18 * var(--u)); width: calc(144.666 * var(--u)); height: calc(198.184 * var(--u))">
+          <img class="loose cover" alt="Ceramic plate" src="design/board/layer-18.webp" style="left: calc(2541 * var(--u)); top: calc(610.156 * var(--u)); width: calc(176.268 * var(--u)); height: calc(179.915 * var(--u))">
           <video class="loose cover" src="design/board/ventonyl.webm" autoplay muted loop playsinline style="left: calc(-189 * var(--u)); top: calc(-67.789 * var(--u)); width: calc(718.981 * var(--u)); height: calc(650.507 * var(--u))"></video>
           <video class="loose cover" src="design/board/jacket.webm" autoplay muted loop playsinline style="left: calc(-0.172 * var(--u)); top: calc(539.797 * var(--u)); width: calc(346.966 * var(--u)); height: calc(219.54 * var(--u))"></video>
-          <img class="loose cover" alt="Calligraphy over a crowd" src="design/board/we.png" style="left: calc(365.227 * var(--u)); top: 0; width: calc(712.355 * var(--u)); height: calc(712.355 * var(--u))">
+          <img class="loose cover" alt="Calligraphy over a crowd" src="design/board/we.webp" style="left: calc(365.227 * var(--u)); top: 0; width: calc(712.355 * var(--u)); height: calc(712.355 * var(--u))">
             </div>
           </div>
         </div>
       </section>
       ${caseBand('02', 'identity, titles, font, lettering, logo, vinyl and poster for Glukoza', '2026', [
-        shot('glu-artbook.png', 'Glukoza artbook', -24, 236, 1226, 613),
+        shot('glu-artbook.webp', 'Glukoza artbook', -24, 236, 1226, 613),
         shot('glu-mark.svg', '', 1404, 0, 214.156, 306.217, ''),
-        shot('glu-poster.png', 'Glukoza listening poster', 3685, 0, 402, 569),
-        shot('glu-8933.png', '', 1680, 0, 802, 800),
-        shot('glu-0118.png', '', 2557, 288, 514, 512),
-        shot('glu-0115.png', '', 3256, 0, 367, 367),
+        shot('glu-poster.webp', 'Glukoza listening poster', 3685, 0, 402, 569),
+        shot('glu-8933.webp', '', 1680, 0, 802, 800),
+        shot('glu-0118.webp', '', 2557, 288, 514, 512),
+        shot('glu-0115.webp', '', 3256, 0, 367, 367),
       ].join(''))}
       ${caseBand('03', 'Created Kaik is an educational playground for graphic designers', '2026', [
         shot('kaik-word.svg', 'Created Kaik', 58, 37, 863, 116, ''),
-        shot('kaik-photo.png', '', 1776, 0, 418, 624),
-        shot('kaik-photo.png', '', 2194, 0, 418, 624, 'cover flip'),
-        shot('kaik-1.png', '', 3772, 0, 314, 419),
-        shot('kaik-2.png', '', 220, 440, 270, 360),
-        shot('kaik-3.png', '', 2960, 194, 454, 606),
+        shot('kaik-photo.webp', '', 1776, 0, 418, 624),
+        shot('kaik-photo.webp', '', 2194, 0, 418, 624, 'cover flip'),
+        shot('kaik-1.webp', '', 3772, 0, 314, 419),
+        shot('kaik-2.webp', '', 220, 440, 270, 360),
+        shot('kaik-3.webp', '', 2960, 194, 454, 606),
         shot('kaik-group.svg', '', 2360, 86, 532.902, 673.717, ''),
         shot('kaik-corner.svg', '', 3631, 585, 358.689, 200, ''),
         shot('kaik-dog.svg', '', 572.01, 202, 1354.68, 627.538, ''),
       ].join(''))}
       ${caseBand('04', 'Font, logo, posters and merch for Feduk', '2026', [
-        shot('feduk-a.png', '', 296, 452, 246.996, 348.189),
-        shot('feduk-b.png', '', 0, 0, 348.189, 348.189),
-        shot('feduk-shirt.png', '', 592, 0, 554, 554),
-        shot('feduk-c.png', '', 1911, -27, 456.998, 456.998),
-        shot('feduk-09.png', '', 1184, 245, 549.213, 309.018),
-        shot('feduk-04.png', '', 3552, 0, 414, 591),
-        shot('feduk-12.png', '', 2664, 0, 560, 800),
+        shot('feduk-a.webp', '', 296, 452, 246.996, 348.189),
+        shot('feduk-b.webp', '', 0, 0, 348.189, 348.189),
+        shot('feduk-shirt.webp', '', 592, 0, 554, 554),
+        shot('feduk-c.webp', '', 1911, -27, 456.998, 456.998),
+        shot('feduk-09.webp', '', 1184, 245, 549.213, 309.018),
+        shot('feduk-04.webp', '', 3552, 0, 414, 591),
+        shot('feduk-12.webp', '', 2664, 0, 560, 800),
       ].join(''))}
       ${caseBand('04', 'Titles, lettering, posters for Sub Urban', '2026', [
-        shot('sub-08.png', '', 0, 0, 472, 629),
-        shot('sub-02.png', '', 1600, 0, 472, 629),
-        shot('sub-06.png', '', 3552, 36, 472, 629),
-        shot('sub-04.png', '', 2251, 171, 472, 629),
+        shot('sub-08.webp', '', 0, 0, 472, 629),
+        shot('sub-02.webp', '', 1600, 0, 472, 629),
+        shot('sub-06.webp', '', 3552, 36, 472, 629),
+        shot('sub-04.webp', '', 2251, 171, 472, 629),
       ].join(''))}
       <div class="signoff">
         <div class="sign-lines"><i></i><i></i><i></i><i></i></div>
@@ -623,9 +673,619 @@ const STRIP_SPEED = 30;
 const STRIP_W = 4087;
 let unmountStrip = null;
 
+function softBlobTexture() {
+  const s = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(s / 2, s / 2, s * 0.03, s / 2, s / 2, s * 0.5);
+  grd.addColorStop(0, 'rgba(42,42,42,0.42)');
+  grd.addColorStop(0.3, 'rgba(55,55,55,0.18)');
+  grd.addColorStop(0.62, 'rgba(70,70,70,0.05)');
+  grd.addColorStop(1, 'rgba(70,70,70,0)');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function prepareStamp(model) {
+  model.traverse((o) => {
+    if (!o.isMesh || !o.material) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      m.flatShading = true;
+      m.envMapIntensity = o.name === 'Pad' ? 0.08 : 0.2;
+      m.needsUpdate = true;
+    }
+  });
+  model.rotation.order = 'YXZ';
+  return model;
+}
+
+const APPLE_FILE = 'models/apple_green_quaternius.glb';
+const STAMP_FILE = 'models/stamp_round.glb';
+const APPLE_GREEN = 0xaaff28;
+const APPLE_RED = 0xe23b32;
+const STAMP_GREEN = 0x3faa38;
+
+function cloneMaterials(root) {
+  root.traverse((o) => {
+    if (!o.isMesh || !o.material) return;
+    o.material = Array.isArray(o.material) ? o.material.map((m) => m.clone()) : o.material.clone();
+  });
+}
+
+function fitTopDown(model) {
+  const pivot = new THREE.Group();
+  pivot.add(model);
+  pivot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(pivot);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const diam = Math.max(size.x, size.z, 1e-6);
+  pivot.scale.setScalar(1 / diam);
+  pivot.position.copy(center).multiplyScalar(-1 / diam);
+  return pivot;
+}
+
+function prepareApple(gltf, skinHex) {
+  const model = gltf.scene.clone(true);
+  cloneMaterials(model);
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      if (m.name === 'PaleGreen' || m.name === 'green') {
+        m.color.setHex(skinHex);
+        m.emissive.setHex(skinHex);
+        m.emissiveIntensity = 0.04;
+      }
+      m.roughness = 0.42;
+      m.metalness = 0;
+    }
+  });
+  return fitTopDown(model);
+}
+
+function prepareGreenStamp(gltf) {
+  const model = gltf.scene.clone(true);
+  cloneMaterials(model);
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of mats) {
+      m.color.setHex(STAMP_GREEN);
+      m.flatShading = true;
+      m.roughness = 0.55;
+      m.metalness = 0;
+      if (o.name === 'Pad') m.color.multiplyScalar(0.78);
+      if (o.name === 'Handle') m.color.multiplyScalar(0.9);
+    }
+  });
+  return fitTopDown(model);
+}
+
+// Шапка #/board: яблоко сверху. Тянешь мышью — крутится, цифры остаются на экране.
+function mountHeaderStamp(host) {
+  if (!host) return () => {};
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  host.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 20);
+  camera.position.set(0, 6, 0);
+  camera.up.set(0, 0, -1);
+  camera.lookAt(0, 0, 0);
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+  const key = new THREE.DirectionalLight(0xfff7f2, 2.5);
+  key.position.set(-2.4, 5.2, -1.7);
+  key.target.position.set(0, 0.2, 0.4);
+  scene.add(key, key.target);
+
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      map: softBlobTexture(),
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      opacity: 0.9,
+    })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.scale.set(1.05, 1.05, 1);
+  shadow.position.set(-0.04, 0.002, -0.02);
+  shadow.renderOrder = -1;
+  scene.add(shadow);
+
+  const tilt = new THREE.Group();
+  tilt.position.set(-0.33, 0, -0.72);
+  scene.add(tilt);
+
+  let alive = true;
+  let model = null;
+  let rotX = 0;
+  let rotY = 0;
+  let rotZ = 0;
+  let drag = null;
+  const raycaster = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+
+  const readout = document.createElement('p');
+  readout.className = 'apple-readout';
+  document.body.appendChild(readout);
+
+  function formatDeg(rad) {
+    const wrapped = ((rad * 180 / Math.PI + 180) % 360 + 360) % 360 - 180;
+    return wrapped.toFixed(1);
+  }
+  function paintReadout() {
+    readout.textContent = `X ${formatDeg(rotX)}°\nY ${formatDeg(rotY)}°\nZ ${formatDeg(rotZ)}°`;
+  }
+  paintReadout();
+
+  function hitApple(e) {
+    if (!model) return false;
+    const rect = renderer.domElement.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return false;
+    ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    return raycaster.intersectObject(tilt, true).length > 0;
+  }
+
+  function onDown(e) {
+    if (!alive || (e.button !== 0 && e.button !== 2)) return;
+    if (e.target instanceof Element && e.target.closest('a')) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    const cx = rect.left + rect.width * 0.36;
+    const cy = rect.top + rect.height * 0.2;
+    const reach = Math.min(rect.width, rect.height) * 0.28;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    if (!hitApple(e) && dx * dx + dy * dy > reach * reach) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, zAxis: e.button === 2 || e.shiftKey };
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+    const step = 0.55 * Math.PI / 180;
+    if (drag.zAxis || e.shiftKey) rotZ += dx * step;
+    else {
+      rotY += dx * step;
+      rotX += dy * step;
+    }
+    tilt.rotation.set(rotX, rotY, rotZ);
+    paintReadout();
+  }
+  function onUp(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    drag = null;
+  }
+  addEventListener('pointerdown', onDown);
+  addEventListener('pointermove', onMove);
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onUp);
+
+  function frame() {
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    const viewH = 2.4;
+    const viewW = viewH * (w / h);
+    camera.top = viewH / 2;
+    camera.bottom = -viewH / 2;
+    camera.left = -viewW / 2;
+    camera.right = viewW / 2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+  const ro = new ResizeObserver(frame);
+  ro.observe(host);
+  frame();
+
+  new GLTFLoader().load(APPLE_FILE, (gltf) => {
+    if (!alive) return;
+    const fitted = prepareApple(gltf, APPLE_GREEN);
+    model = new THREE.Group();
+    model.scale.setScalar(0.78);
+    model.add(fitted);
+    tilt.add(model);
+  });
+
+  renderer.setAnimationLoop(() => {
+    if (!alive) return;
+    tilt.rotation.set(rotX, rotY, rotZ);
+    renderer.render(scene, camera);
+  });
+
+  globalThis.__headerStamp = () => ({ x: formatDeg(rotX), y: formatDeg(rotY), z: formatDeg(rotZ) });
+
+  return () => {
+    alive = false;
+    removeEventListener('pointerdown', onDown);
+    removeEventListener('pointermove', onMove);
+    removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onUp);
+    readout.remove();
+    renderer.setAnimationLoop(null);
+    ro.disconnect();
+    pmrem.dispose();
+    renderer.dispose();
+    renderer.domElement.remove();
+    if (globalThis.__headerStamp) delete globalThis.__headerStamp;
+  };
+}
+
+// Последний экран: один клик — печать падает на линию и остаётся.
+function mountSignStamp(host) {
+  if (!host) return () => {};
+  const canvas = document.createElement('canvas');
+  canvas.className = 'sign-stage';
+  host.appendChild(canvas);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+  camera.position.set(0.2, 1.12, 2.7);
+  camera.lookAt(0, 0, 0);
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const key = new THREE.DirectionalLight(0xffffff, 2.3);
+  key.position.set(-1.7, 3.6, 1.4);
+  scene.add(key);
+
+  const SIZE = 0.52;
+  const DROP = 760;
+  const PRESS = 120;
+  const START_Y = 1.62;
+
+  const shadow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.34, 40),
+    new THREE.MeshBasicMaterial({
+      map: softBlobTexture(),
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      opacity: 0,
+    })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(0.07, 0.004, 0.05);
+  shadow.visible = false;
+  scene.add(shadow);
+
+  let alive = true;
+  let model = null;
+  let playing = false;
+  let placed = false;
+  let want = false;
+  let startedAt = 0;
+
+  function easeInCubic(t) { return t * t * t; }
+  function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function setScale(x, y, z) {
+    model.scale.set(SIZE * x, SIZE * y, SIZE * z);
+  }
+
+  function shade() {
+    const y = model.position.y;
+    const k = 1 - Math.min(Math.max(y, 0) / START_Y, 1);
+    shadow.material.opacity = 0.12 + k * 0.7;
+    const s = 1.28 - k * 0.32;
+    shadow.scale.set(s, s, 1);
+  }
+
+  function begin(now) {
+    playing = true;
+    startedAt = now;
+    model.visible = true;
+    shadow.visible = true;
+    model.position.set(0, START_Y, 0);
+    model.rotation.set(-0.4, Math.PI * 0.8, 0.2);
+    setScale(1, 1, 1);
+    shade();
+  }
+
+  function pose(now) {
+    if (!model) return;
+    if (!playing) {
+      if (placed) shade();
+      return;
+    }
+    const t = now - startedAt;
+    if (t < DROP) {
+      const k = easeInCubic(t / DROP);
+      const r = easeInOut(t / DROP);
+      model.position.set(0, lerp(START_Y, 0, k), 0);
+      model.rotation.set(lerp(-0.4, 0, r), lerp(Math.PI * 0.8, 0, r), lerp(0.2, 0, r));
+      setScale(1, 1, 1);
+      shade();
+      return;
+    }
+    if (t < DROP + PRESS) {
+      const s = Math.sin(((t - DROP) / PRESS) * Math.PI);
+      model.position.set(0, 0, 0);
+      model.rotation.set(0, 0, 0);
+      setScale(1 + s * 0.045, 1 - s * 0.09, 1 + s * 0.045);
+      shade();
+      return;
+    }
+    model.position.set(0, 0, 0);
+    model.rotation.set(0, 0, 0);
+    setScale(1, 1, 1);
+    shade();
+    playing = false;
+    placed = true;
+    host.classList.add('is-placed');
+  }
+
+  function onClick() {
+    if (!alive || playing || placed) return;
+    want = true;
+    if (model) begin(performance.now());
+  }
+  host.addEventListener('click', onClick);
+
+  function frame() {
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+  const ro = new ResizeObserver(frame);
+  ro.observe(host);
+  frame();
+
+  new GLTFLoader().load('models/stamp_round.glb', (gltf) => {
+    if (!alive) return;
+    model = prepareStamp(gltf.scene);
+    model.visible = false;
+    scene.add(model);
+    if (want && !playing && !placed) begin(performance.now());
+  });
+
+  renderer.setAnimationLoop((now) => {
+    if (!alive) return;
+    pose(now);
+    renderer.render(scene, camera);
+  });
+
+  return () => {
+    alive = false;
+    host.removeEventListener('click', onClick);
+    renderer.setAnimationLoop(null);
+    ro.disconnect();
+    pmrem.dispose();
+    renderer.dispose();
+  };
+}
+
+// Полосы 1–4: клик поднимает объект из-за нижнего края, вид строго сверху, и сразу уводит вниз.
+function mountBandDrops(root) {
+  const bands = [...root.querySelectorAll('.reel .case')].slice(0, 4);
+  if (!bands.length) return () => {};
+
+  const layer = document.createElement('div');
+  layer.className = 'band-drop';
+  const canvas = document.createElement('canvas');
+  layer.appendChild(canvas);
+  root.appendChild(layer);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 20);
+  camera.position.set(0, 8, 0);
+  camera.up.set(0, 0, -1);
+  camera.lookAt(0, 0, 0);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+  const key = new THREE.DirectionalLight(0xfff7f2, 1.8);
+  key.position.set(-2.2, 6, -1.6);
+  scene.add(key);
+
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({
+      map: softBlobTexture(),
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+      opacity: 0,
+    })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.visible = false;
+  shadow.renderOrder = -1;
+  scene.add(shadow);
+
+  const actors = [null, null, null, null];
+  let alive = true;
+  let playing = false;
+  let startedAt = 0;
+  let pending = -1;
+  let landX = 0;
+  let landZ = 0;
+  const UP = 620;
+  const DOWN = 480;
+  const SIZE = 0.46;
+
+  function frame() {
+    const w = innerWidth;
+    const h = innerHeight;
+    if (w < 2 || h < 2) return;
+    const viewH = 2;
+    const viewW = viewH * (w / h);
+    camera.top = viewH / 2;
+    camera.bottom = -viewH / 2;
+    camera.left = -viewW / 2;
+    camera.right = viewW / 2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+  }
+  frame();
+  addEventListener('resize', frame);
+
+  function worldOf(sx, sy) {
+    const viewH = camera.top - camera.bottom;
+    const viewW = camera.right - camera.left;
+    return {
+      x: (sx / innerWidth - 0.5) * viewW,
+      z: (sy / innerHeight - 0.5) * viewH,
+    };
+  }
+
+  function begin(index, now) {
+    const actor = actors[index];
+    if (!actor) {
+      pending = index;
+      return;
+    }
+    actors.forEach((item) => { if (item) item.visible = false; });
+    const band = bands[index].getBoundingClientRect();
+    const sx = Math.max(innerWidth * 0.22, Math.min(innerWidth * 0.78, band.left + band.width / 2));
+    const sy = Math.max(innerHeight * 0.28, Math.min(innerHeight * 0.62, band.top + band.height / 2));
+    const spot = worldOf(sx, sy);
+    landX = spot.x;
+    landZ = spot.z;
+    actor.visible = true;
+    actor.scale.setScalar(SIZE);
+    shadow.visible = true;
+    playing = true;
+    pending = -1;
+    startedAt = now;
+  }
+
+  function pose(now) {
+    const actor = actors.find((item) => item && item.visible);
+    if (!playing || !actor) return;
+    const radiusPx = (SIZE / 2) * innerHeight / 2 + 18;
+    const below = worldOf(innerWidth / 2, innerHeight + radiusPx);
+    const t = now - startedAt;
+    let k;
+    let z;
+    if (t < UP) {
+      k = 1 - (1 - t / UP) ** 3;
+      z = landZ + (below.z - landZ) * (1 - k);
+    } else if (t < UP + DOWN) {
+      k = ((t - UP) / DOWN) ** 3;
+      z = landZ + (below.z - landZ) * k;
+    } else {
+      actor.visible = false;
+      shadow.visible = false;
+      playing = false;
+      return;
+    }
+    actor.position.set(landX, 0.03, z);
+    shadow.position.set(landX + 0.1, 0.002, z + 0.12);
+    const settled = t < UP ? k : 1 - k;
+    shadow.material.opacity = 0.2 + settled * 0.65;
+    shadow.scale.setScalar(1.15 - settled * 0.18);
+  }
+
+  const stops = bands.map((band, index) => {
+    let gesture = null;
+    function onDown(e) {
+      if (e.button !== 0 || playing) return;
+      gesture = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    }
+    function onUp(e) {
+      if (!gesture || e.pointerId !== gesture.id) return;
+      const dx = e.clientX - gesture.x;
+      const dy = e.clientY - gesture.y;
+      gesture = null;
+      if (playing || dx * dx + dy * dy > 64) return;
+      begin(index, performance.now());
+    }
+    band.addEventListener('pointerdown', onDown);
+    band.addEventListener('pointerup', onUp);
+    return () => {
+      band.removeEventListener('pointerdown', onDown);
+      band.removeEventListener('pointerup', onUp);
+    };
+  });
+
+  Promise.all([
+    new GLTFLoader().loadAsync(APPLE_FILE),
+    new GLTFLoader().loadAsync(STAMP_FILE),
+  ]).then(([appleGltf, stampGltf]) => {
+    if (!alive) return;
+    const built = [
+      prepareApple(appleGltf, APPLE_RED),
+      prepareGreenStamp(stampGltf),
+      prepareApple(appleGltf, APPLE_GREEN),
+      prepareGreenStamp(stampGltf),
+    ];
+    built.forEach((fitted, i) => {
+      const rig = new THREE.Group();
+      rig.add(fitted);
+      rig.visible = false;
+      actors[i] = rig;
+      scene.add(rig);
+    });
+    if (pending >= 0 && !playing) begin(pending, performance.now());
+  }).catch((err) => { globalThis.__dropErr = String(err); });
+
+  renderer.setAnimationLoop((now) => {
+    if (!alive) return;
+    pose(now);
+    globalThis.__drop = { playing, pending, n: actors.filter(Boolean).length, t: playing ? now - startedAt : -1 };
+    renderer.render(scene, camera);
+  });
+
+  return () => {
+    alive = false;
+    stops.forEach((stop) => stop());
+    removeEventListener('resize', frame);
+    renderer.setAnimationLoop(null);
+    renderer.dispose();
+    layer.remove();
+  };
+}
+
+function mountBoardFx(root) {
+  const stopHeader = mountHeaderStamp(root.querySelector('.peek'));
+  const stopSign = mountSignStamp(root.querySelector('.signoff'));
+  const stopBands = mountBandDrops(root);
+  return () => {
+    stopHeader();
+    stopSign();
+    stopBands();
+  };
+}
+
 function mountStrip(root) {
   const stops = [...root.querySelectorAll('.scroller')].map((scroller, index) => mountScroller(scroller, index));
-  return () => stops.forEach((stop) => stop());
+  const stopFx = mountBoardFx(root);
+  return () => {
+    stops.forEach((stop) => stop());
+    stopFx();
+  };
 }
 
 function mountScroller(scroller, index) {

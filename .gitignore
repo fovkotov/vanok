@@ -2,3 +2,5 @@
 .env
 .env.*
 credentials.json
+.vercel
+.env*

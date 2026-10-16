@@ -99,7 +99,7 @@ blob.rotation.x = -Math.PI / 2;
 blob.position.y = 0.004;
 scene.add(blob);
 
-const imprintMap = await new THREE.TextureLoader().loadAsync('models/stamp_imprint.png');
+const imprintMap = await new THREE.TextureLoader().loadAsync('models/stamp_imprint.webp');
 imprintMap.colorSpace = THREE.SRGBColorSpace;
 imprintMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
 // Outer ink ring is ~546px across inside the 1200×630 sheet. The pad is ±0.4 before SIZE.
