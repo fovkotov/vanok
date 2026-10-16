@@ -76,7 +76,8 @@
   .chrome.mid .nav-about { top: calc(50% - 8 * var(--k)); }
   .chrome.top .nav-about { top: calc(16 * var(--k)); }
 
-  .mark { display: block; }
+  .mark { display: block; cursor: pointer; text-decoration: none; }
+  .mark img { display: block; width: 100%; height: 100%; }
   .mark-vanok {
     left: calc(702 * var(--k));
     width: calc(233.497 * var(--k));
@@ -203,7 +204,6 @@
     margin: 0 calc(-12 * var(--k)) calc(88 * var(--k));
   }
   .lockup > * { position: absolute; }
-  .lockup .mark { pointer-events: none; }
   .lockup .mark-vanok {
     left: calc(705.001 * var(--k));
     top: 0;
@@ -347,6 +347,128 @@
     width: calc(226 * var(--k));
     border-top: 1px solid currentColor;
   }
+  .sign-imprints {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .sign-imprint {
+    position: absolute;
+    display: block;
+    transform-origin: center center;
+    pointer-events: none;
+  }
+  .sign-imprint .ink {
+    display: block;
+    width: 100%;
+    height: auto;
+    -webkit-user-drag: none;
+  }
+  .sign-imprint .dye {
+    position: absolute;
+    inset: 0;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+  .stamp-panel {
+    position: fixed;
+    z-index: 40;
+    right: 16px;
+    bottom: 16px;
+    width: min(300px, calc(100vw - 32px));
+    max-height: min(680px, calc(100vh - 32px));
+    overflow: auto;
+    padding: 12px 14px 14px;
+    background: #d7d7d7;
+    color: #0c6df4;
+    border: 1px solid #0c6df4;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .stamp-panel[hidden] { display: none; }
+  .stamp-panel h2 {
+    margin: 0;
+    padding-right: 52px;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .stamp-panel .hint { margin: 4px 0 8px; }
+  .stamp-panel .tabs { display: flex; gap: 6px; margin: 0 0 8px; }
+  .stamp-panel .tabs button {
+    flex: 1;
+    border: 1px solid #0c6df4;
+    background: transparent;
+    color: #0c6df4;
+    font: inherit;
+    padding: 4px 6px;
+    cursor: pointer;
+  }
+  .stamp-panel .tabs button.on { background: #0c6df4; color: #e1e1e1; }
+  .stamp-panel .pane[hidden] { display: none; }
+  .stamp-panel .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    color: #0c6df4;
+    font: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .stamp-panel label.row { display: block; margin-top: 8px; }
+  .stamp-panel label.row span { display: flex; justify-content: space-between; gap: 8px; }
+  .stamp-panel b { font-weight: 400; }
+  .stamp-panel i { font-style: normal; }
+  .stamp-panel input[type="range"] {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    accent-color: #0c6df4;
+  }
+  .stamp-panel select,
+  .stamp-panel input[type="color"] {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    color: #0c6df4;
+    background: #e8e8e8;
+    border: 1px solid #0c6df4;
+    font: inherit;
+  }
+  .stamp-panel input[type="color"] { height: 24px; padding: 0; }
+  .stamp-panel .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .stamp-panel .checks label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stamp-panel .checks input { accent-color: #0c6df4; }
+  .stamp-panel .meta { margin: 10px 0 0; }
+  .stamp-panel .meta p { margin: 0 0 4px; }
+  .stamp-panel .thumbs { display: flex; gap: 6px; margin-top: 6px; }
+  .stamp-panel .thumbs button {
+    width: 84px;
+    height: 46px;
+    padding: 2px;
+    border: 1px solid rgba(12, 109, 244, 0.35);
+    background: #ececec;
+    cursor: pointer;
+  }
+  .stamp-panel .thumbs button.on { border-color: #0c6df4; box-shadow: inset 0 0 0 1px #0c6df4; }
+  .stamp-panel .thumbs img { width: 100%; height: 100%; object-fit: contain; }
 
   .chrome.strip {
     position: fixed;
@@ -397,8 +519,8 @@
     top: calc(10 * var(--k));
     transform: none;
   }
-  .chrome.strip .mark,
   .chrome.strip .peek { pointer-events: none; }
+  .chrome.strip .mark { pointer-events: auto; }
   .chrome.strip .mark-vanok {
     left: calc(726 * var(--k));
     top: calc(12 * var(--k));
@@ -412,29 +534,11 @@
     height: calc(193.387 * var(--k));
   }
   .chrome.strip .peek {
-    left: calc(1220 * var(--k));
-    top: 0;
-    width: calc(255 * var(--k));
-    height: calc(306 * var(--k));
-    overflow: visible;
-  }
-  .chrome.strip .peek canvas { display: block; width: 100%; height: 100%; }
-  .apple-readout {
-    position: fixed;
-    z-index: 6;
-    left: calc(1088 * var(--k));
-    top: calc(168 * var(--k));
-    margin: 0;
-    padding: 4px 8px;
-    background: var(--bg);
-    color: #111;
-    font-family: var(--grotesk);
-    font-size: max(20px, calc(26 * var(--k)));
-    font-weight: 700;
-    line-height: 1.2;
-    white-space: pre;
-    pointer-events: none;
-    user-select: none;
+    left: calc(1257 * var(--k));
+    top: calc(-77 * var(--k));
+    width: calc(161 * var(--k));
+    height: calc(140 * var(--k));
+    object-fit: fill;
   }
   .band-drop {
     position: fixed;
@@ -478,8 +582,8 @@ const chrome = (mode, current) => {
   return `
     <a class="crosshair" href="#/"><img src="design/assets/crosshair.svg" alt="" width="22" height="22"></a>
     <p class="nav-text tagline">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
-    <img class="mark mark-vanok" src="design/assets/wordmark-vanok.svg" alt="Vanök">
-    <img class="mark mark-regular" src="design/assets/wordmark-regular.svg" alt="Regular">
+    <a class="mark mark-vanok" href="#/board"><img src="design/assets/wordmark-vanok.svg" alt="Vanök"></a>
+    <a class="mark mark-regular" href="#/board"><img src="design/assets/wordmark-regular.svg" alt="Regular"></a>
     <a class="nav-text nav-index" href="#/index"${cur('index')}>Index</a>
     <a class="nav-text nav-about" href="#/about"${cur('about')}>About</a>
   `;
@@ -546,7 +650,7 @@ const TEMPLATES = {
   `,
   board: () => `
     <header class="chrome strip">
-      <div class="peek" aria-hidden="true"></div>
+      <img class="peek" src="design/assets/header-peek.webp" alt="">
       <a class="crosshair" href="#/"><img src="design/assets/crosshair-frame.svg" alt=""></a>
       <p class="nav-text tagline">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
       <a class="nav-text nav-index" href="#/index">Index</a>
@@ -555,8 +659,8 @@ const TEMPLATES = {
     </header>
     <div class="reel">
       <div class="lockup">
-        <img class="mark mark-vanok" src="design/assets/wordmark-vanok-frame.svg" alt="Vanök">
-        <img class="mark mark-regular" src="design/assets/wordmark-regular-frame.svg" alt="Regular">
+        <a class="mark mark-vanok" href="#/board"><img src="design/assets/wordmark-vanok-frame.svg" alt="Vanök"></a>
+        <a class="mark mark-regular" href="#/board"><img src="design/assets/wordmark-regular-frame.svg" alt="Regular"></a>
       </div>
       <section class="case">
         <p class="case-meta"><span>01</span><span>Wild Ea$t album identity for SALUKI</span><span>2024</span><span class="full">Full case</span></p>
@@ -670,6 +774,83 @@ let dragYaw = 0, dragPitch = 0;
 let grab = null;
 
 const STRIP_SPEED = 30;
+const STRIP_BOOST_MS = 280;
+const STRIP_BOOST_IN = 120;
+const STRIP_BOOST_OUT = 300;
+let stripBoostUntil = 0;
+let boostShown = 1;
+let boostFrom = 1;
+let boostTo = 1;
+let boostT0 = 0;
+
+function noteStripBoost() {
+  stripBoostUntil = performance.now() + STRIP_BOOST_MS;
+}
+
+function stripBoost() {
+  const want = performance.now() < stripBoostUntil ? 2 : 1;
+  const now = performance.now();
+  if (want !== boostTo) {
+    boostFrom = boostShown;
+    boostTo = want;
+    boostT0 = now;
+  }
+  const dur = boostTo > boostFrom ? STRIP_BOOST_IN : STRIP_BOOST_OUT;
+  const u = dur <= 0 ? 1 : Math.min(1, (now - boostT0) / dur);
+  const e = u * u * (3 - 2 * u);
+  boostShown = boostFrom + (boostTo - boostFrom) * e;
+  return boostShown;
+}
+
+let lastPageY = null;
+function pageScrollY() {
+  const root = document.scrollingElement;
+  return Math.max(
+    window.scrollY || 0,
+    root ? root.scrollTop : 0,
+    document.body.scrollTop || 0
+  );
+}
+function watchPageScroll() {
+  const y = pageScrollY();
+  if (lastPageY === null) {
+    lastPageY = y;
+    return;
+  }
+  if (y !== lastPageY) {
+    lastPageY = y;
+    noteStripBoost();
+  }
+}
+
+// Any vertical wheel component scrolls the page, even when deltaX is larger.
+function wheelScrollsPage(event) {
+  if (event.shiftKey) return false;
+  return Math.abs(event.deltaY) > 0;
+}
+
+function onPageScroll(event) {
+  const target = event.target;
+  if (target instanceof Element && target.closest('.scroller')) return;
+  noteStripBoost();
+}
+document.addEventListener('wheel', (event) => {
+  if (wheelScrollsPage(event)) noteStripBoost();
+}, { capture: true, passive: true });
+window.addEventListener('scroll', onPageScroll, { capture: true, passive: true });
+document.addEventListener('scroll', onPageScroll, { capture: true, passive: true });
+if (document.scrollingElement) {
+  document.scrollingElement.addEventListener('scroll', onPageScroll, { passive: true });
+}
+document.body.addEventListener('scroll', onPageScroll, { passive: true });
+addEventListener('touchmove', noteStripBoost, { passive: true });
+addEventListener('keydown', (event) => {
+  const tag = event.target && event.target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'PageUp' || event.key === 'PageDown' || event.key === 'Home' || event.key === 'End' || event.key === ' ') {
+    noteStripBoost();
+  }
+});
 const STRIP_W = 4087;
 let unmountStrip = null;
 
@@ -737,7 +918,7 @@ function prepareApple(gltf, skinHex) {
     if (!o.isMesh) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     for (const m of mats) {
-      if (m.name === 'PaleGreen' || m.name === 'green') {
+      if (skinHex != null && (m.name === 'PaleGreen' || m.name === 'green')) {
         m.color.setHex(skinHex);
         m.emissive.setHex(skinHex);
         m.emissiveIntensity = 0.04;
@@ -746,6 +927,37 @@ function prepareApple(gltf, skinHex) {
       m.metalness = 0;
     }
   });
+  return fitTopDown(model);
+}
+
+function prepareHalfApple(gltf) {
+  const model = gltf.scene.clone(true);
+  cloneMaterials(model);
+  model.traverse((o) => {
+    if (o.isMesh && o.geometry) o.geometry = o.geometry.clone();
+  });
+  paintApple(model);
+  const body = meshByMaterial(model, 'green');
+  const stem = meshByMaterial(model, 'brown');
+  const flesh = meshByMaterial(model, 'brownLight');
+  const leaf = meshByMaterial(model, 'DarkGreen');
+  if (flesh && stem && body) {
+    const cutN = worldNormal(flesh);
+    const stemDir = centerOf(stem).sub(centerOf(body));
+    if (cutN.lengthSq() > 1e-8 && stemDir.lengthSq() > 1e-8) {
+      const qCut = new THREE.Quaternion().setFromUnitVectors(cutN, new THREE.Vector3(0, 1, 0));
+      const stemFlat = stemDir.normalize().applyQuaternion(qCut);
+      stemFlat.y = 0;
+      if (stemFlat.lengthSq() > 1e-8) {
+        const qStem = new THREE.Quaternion().setFromUnitVectors(stemFlat.normalize(), new THREE.Vector3(0, 0, 1));
+        model.quaternion.copy(qStem.multiply(qCut));
+      } else {
+        model.quaternion.copy(qCut);
+      }
+    }
+  }
+  model.updateMatrixWorld(true);
+  if (leaf && body) faceLeafToCamera(leaf, centerOf(body));
   return fitTopDown(model);
 }
 
@@ -767,171 +979,20 @@ function prepareGreenStamp(gltf) {
   return fitTopDown(model);
 }
 
-// Шапка #/board: яблоко сверху. Тянешь мышью — крутится, цифры остаются на экране.
-function mountHeaderStamp(host) {
-  if (!host) return () => {};
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  host.appendChild(renderer.domElement);
+// «sign here»: печать выезжает из-за нижнего края в точку клика, строго сверху,
+// оставляет оттиск там и уходит обратно вниз. G — настройки этого жеста, только на время вкладки.
+const STAMP_IMPRINTS = [
+  { file: 'frame-247.png', src: 'design/stamps/frame-247.png' },
+  { file: 'frame-279.png', src: 'design/stamps/frame-279.png' },
+  { file: 'frame-280.png', src: 'design/stamps/frame-280.png' },
+];
+const INK_FRAC = 575 / 1200;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 20);
-  camera.position.set(0, 6, 0);
-  camera.up.set(0, 0, -1);
-  camera.lookAt(0, 0, 0);
-
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-  const key = new THREE.DirectionalLight(0xfff7f2, 2.5);
-  key.position.set(-2.4, 5.2, -1.7);
-  key.target.position.set(0, 0.2, 0.4);
-  scene.add(key, key.target);
-
-  const shadow = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({
-      map: softBlobTexture(),
-      transparent: true,
-      depthWrite: false,
-      toneMapped: false,
-      opacity: 0.9,
-    })
-  );
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.scale.set(1.05, 1.05, 1);
-  shadow.position.set(-0.04, 0.002, -0.02);
-  shadow.renderOrder = -1;
-  scene.add(shadow);
-
-  const tilt = new THREE.Group();
-  tilt.position.set(-0.33, 0, -0.72);
-  scene.add(tilt);
-
-  let alive = true;
-  let model = null;
-  let rotX = 0;
-  let rotY = 0;
-  let rotZ = 0;
-  let drag = null;
-  const raycaster = new THREE.Raycaster();
-  const ndc = new THREE.Vector2();
-
-  const readout = document.createElement('p');
-  readout.className = 'apple-readout';
-  document.body.appendChild(readout);
-
-  function formatDeg(rad) {
-    const wrapped = ((rad * 180 / Math.PI + 180) % 360 + 360) % 360 - 180;
-    return wrapped.toFixed(1);
-  }
-  function paintReadout() {
-    readout.textContent = `X ${formatDeg(rotX)}°\nY ${formatDeg(rotY)}°\nZ ${formatDeg(rotZ)}°`;
-  }
-  paintReadout();
-
-  function hitApple(e) {
-    if (!model) return false;
-    const rect = renderer.domElement.getBoundingClientRect();
-    if (rect.width < 1 || rect.height < 1) return false;
-    ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(ndc, camera);
-    return raycaster.intersectObject(tilt, true).length > 0;
-  }
-
-  function onDown(e) {
-    if (!alive || (e.button !== 0 && e.button !== 2)) return;
-    if (e.target instanceof Element && e.target.closest('a')) return;
-    const rect = renderer.domElement.getBoundingClientRect();
-    const cx = rect.left + rect.width * 0.36;
-    const cy = rect.top + rect.height * 0.2;
-    const reach = Math.min(rect.width, rect.height) * 0.28;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
-    if (!hitApple(e) && dx * dx + dy * dy > reach * reach) return;
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, zAxis: e.button === 2 || e.shiftKey };
-    e.preventDefault();
-  }
-  function onMove(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    drag.x = e.clientX;
-    drag.y = e.clientY;
-    const step = 0.55 * Math.PI / 180;
-    if (drag.zAxis || e.shiftKey) rotZ += dx * step;
-    else {
-      rotY += dx * step;
-      rotX += dy * step;
-    }
-    tilt.rotation.set(rotX, rotY, rotZ);
-    paintReadout();
-  }
-  function onUp(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    drag = null;
-  }
-  addEventListener('pointerdown', onDown);
-  addEventListener('pointermove', onMove);
-  addEventListener('pointerup', onUp);
-  addEventListener('pointercancel', onUp);
-
-  function frame() {
-    const w = host.clientWidth;
-    const h = host.clientHeight;
-    if (w < 2 || h < 2) return;
-    const viewH = 2.4;
-    const viewW = viewH * (w / h);
-    camera.top = viewH / 2;
-    camera.bottom = -viewH / 2;
-    camera.left = -viewW / 2;
-    camera.right = viewW / 2;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h, false);
-  }
-  const ro = new ResizeObserver(frame);
-  ro.observe(host);
-  frame();
-
-  new GLTFLoader().load(APPLE_FILE, (gltf) => {
-    if (!alive) return;
-    const fitted = prepareApple(gltf, APPLE_GREEN);
-    model = new THREE.Group();
-    model.scale.setScalar(0.78);
-    model.add(fitted);
-    tilt.add(model);
-  });
-
-  renderer.setAnimationLoop(() => {
-    if (!alive) return;
-    tilt.rotation.set(rotX, rotY, rotZ);
-    renderer.render(scene, camera);
-  });
-
-  globalThis.__headerStamp = () => ({ x: formatDeg(rotX), y: formatDeg(rotY), z: formatDeg(rotZ) });
-
-  return () => {
-    alive = false;
-    removeEventListener('pointerdown', onDown);
-    removeEventListener('pointermove', onMove);
-    removeEventListener('pointerup', onUp);
-    removeEventListener('pointercancel', onUp);
-    readout.remove();
-    renderer.setAnimationLoop(null);
-    ro.disconnect();
-    pmrem.dispose();
-    renderer.dispose();
-    renderer.domElement.remove();
-    if (globalThis.__headerStamp) delete globalThis.__headerStamp;
-  };
-}
-
-// Последний экран: один клик — печать падает на линию и остаётся.
 function mountSignStamp(host) {
   if (!host) return () => {};
+  const layer = document.createElement('div');
+  layer.className = 'sign-imprints';
+  host.appendChild(layer);
   const canvas = document.createElement('canvas');
   canvas.className = 'sign-stage';
   host.appendChild(canvas);
@@ -942,24 +1003,22 @@ function mountSignStamp(host) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
-  camera.position.set(0.2, 1.12, 2.7);
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 30);
+  camera.position.set(0, 8, 0);
+  camera.up.set(0, 0, -1);
   camera.lookAt(0, 0, 0);
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const key = new THREE.DirectionalLight(0xffffff, 2.3);
-  key.position.set(-1.7, 3.6, 1.4);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+  const key = new THREE.DirectionalLight(0xfff7f2, 1.7);
+  key.position.set(-2.2, 6, -1.4);
   scene.add(key);
 
-  const SIZE = 0.52;
-  const DROP = 760;
-  const PRESS = 120;
-  const START_Y = 1.62;
+  const SIZE = 0.62;
+  const viewH = 2.4;
+  let viewW = viewH;
 
   const shadow = new THREE.Mesh(
-    new THREE.CircleGeometry(0.34, 40),
+    new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({
       map: softBlobTexture(),
       transparent: true,
@@ -969,117 +1028,652 @@ function mountSignStamp(host) {
     })
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.set(0.07, 0.004, 0.05);
   shadow.visible = false;
+  shadow.renderOrder = -1;
   scene.add(shadow);
 
+  function blankRig() {
+    return {
+    descent: 1,
+    squash: 0.18,
+    dwell: 0.34,
+    lift: 1.2,
+    scale: 1,
+    rotation: 8,
+    startX: 0, startY: 0, startZ: 0,
+    flyX: 0, flyY: 0, flyZ: 0,
+    pressX: 0, pressY: 0, pressZ: 0,
+    jitter: 0,
+    offsetX: 0,
+    offsetY: 0,
+    opacity: 1,
+    tint: '#0c6df4',
+    tintAmount: 0,
+    blur: 0,
+    liftAway: true,
+    stack: 'add',
+    file: 'random',
+    };
+  }
+  const stampRig = blankRig();
+  stampRig.descent = 1;
+  stampRig.squash = -0.1;
+  stampRig.dwell = 0.12;
+  stampRig.lift = 1.55;
+  stampRig.scale = 1;
+  stampRig.rotation = 8;
+  stampRig.startX = -31.2;
+  stampRig.startY = 72.7;
+  stampRig.startZ = -2.4;
+  stampRig.flyX = 0;
+  stampRig.flyY = 0;
+  stampRig.flyZ = -1.3;
+  stampRig.pressX = 0;
+  stampRig.pressY = 76.9;
+  stampRig.pressZ = -1.3;
+  stampRig.jitter = 0;
+  stampRig.offsetX = 0;
+  stampRig.offsetY = 0;
+  stampRig.opacity = 1;
+  stampRig.blur = 0;
+  stampRig.tintAmount = 0;
+  stampRig.liftAway = true;
+  stampRig.stack = 'add';
+  stampRig.file = 'random';
+  const appleRig = blankRig();
+  appleRig.descent = 1;
+  appleRig.squash = -0.1;
+  appleRig.dwell = 0.17;
+  appleRig.lift = 1.2;
+  appleRig.scale = 1.13;
+  appleRig.rotation = 17;
+  appleRig.startX = 0;
+  appleRig.startY = 0;
+  appleRig.startZ = 0;
+  appleRig.flyX = 180;
+  appleRig.flyY = 0;
+  appleRig.flyZ = 0;
+  appleRig.pressX = 180;
+  appleRig.pressY = 19.2;
+  appleRig.pressZ = 0;
+  appleRig.jitter = 0;
+  appleRig.offsetX = 0;
+  appleRig.offsetY = 0;
+  appleRig.opacity = 1;
+  appleRig.blur = 0;
+  appleRig.tintAmount = 0;
+  appleRig.liftAway = true;
+
+  for (const item of STAMP_IMPRINTS) {
+    const preload = new Image();
+    preload.src = item.src;
+  }
+
+  const panel = document.createElement('aside');
+  panel.className = 'stamp-panel';
+  panel.hidden = true;
+  panel.setAttribute('aria-label', 'Настройки печати');
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'close';
+  close.textContent = 'Закрыть';
+  const title = document.createElement('h2');
+  title.textContent = 'Жест';
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.textContent = 'Клавиша G открывает панель. Настройки только в этой вкладке.';
+  panel.append(close, title, hint);
+  document.body.appendChild(panel);
+
+  const pct = (n) => Math.round(n * 100) + '%';
+  const deg = (n) => n.toFixed(1) + '°';
+  let nextLine = null;
+  let lastLine = null;
+  let fileSelect = null;
+  let thumbButtons = [];
+
+  function addSlider(parent, rig, label, key, min, max, step, format, visual) {
+    const wrap = document.createElement('label');
+    wrap.className = 'row';
+    const head = document.createElement('span');
+    const name = document.createElement('b');
+    name.textContent = label;
+    const val = document.createElement('i');
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = String(min);
+    input.max = String(max);
+    input.step = String(step);
+    input.value = String(rig[key]);
+    const sync = () => { val.textContent = format(Number(input.value)); };
+    input.addEventListener('input', () => {
+      rig[key] = Number(input.value);
+      sync();
+      if (visual && rig === stampRig) paintMarks();
+    });
+    sync();
+    head.append(name, val);
+    wrap.append(head, input);
+    parent.append(wrap);
+  }
+
+  function addAxes(parent, rig, title, prefix) {
+    addSlider(parent, rig, title + ' X', prefix + 'X', -180, 180, 0.1, deg, false);
+    addSlider(parent, rig, title + ' Y', prefix + 'Y', -180, 180, 0.1, deg, false);
+    addSlider(parent, rig, title + ' Z', prefix + 'Z', -180, 180, 0.1, deg, false);
+  }
+
+  function fillPane(pane, rig, ink) {
+    const scaleLabel = ink ? 'Масштаб оттиска' : 'Масштаб';
+    addSlider(pane, rig, 'Скорость спуска', 'descent', 0.4, 2.6, 0.05, (n) => n.toFixed(2) + '×', false);
+    addSlider(pane, rig, 'Сжатие при нажатии', 'squash', -0.8, 0.8, 0.01, pct, false);
+    addSlider(pane, rig, 'Удержание', 'dwell', 0, 1.6, 0.01, (n) => n.toFixed(2) + ' с', false);
+    addSlider(pane, rig, 'Скорость подъёма', 'lift', 0.4, 2.6, 0.05, (n) => n.toFixed(2) + '×', false);
+    addSlider(pane, rig, scaleLabel, 'scale', 0.4, 1.8, 0.01, pct, ink);
+    addSlider(pane, rig, 'Поворот', 'rotation', 0, 45, 1, (n) => '±' + Math.round(n) + '°', false);
+    addAxes(pane, rig, 'Поворот на старте', 'start');
+    addAxes(pane, rig, 'Поворот в полёте', 'fly');
+    addAxes(pane, rig, 'Поворот при печати', 'press');
+    addSlider(pane, rig, 'Случайный сдвиг', 'jitter', 0, 48, 1, (n) => Math.round(n) + ' px', false);
+    addSlider(pane, rig, 'Сдвиг по X', 'offsetX', -80, 80, 1, (n) => Math.round(n) + ' px', ink);
+    addSlider(pane, rig, 'Сдвиг по Y', 'offsetY', -80, 80, 1, (n) => Math.round(n) + ' px', ink);
+    addSlider(pane, rig, 'Непрозрачность', 'opacity', 0.15, 1, 0.01, pct, ink);
+    addSlider(pane, rig, 'Размытие', 'blur', 0, 12, 0.1, (n) => n.toFixed(1) + ' px', ink);
+
+    const tintRow = document.createElement('label');
+    tintRow.className = 'row';
+    const tintHead = document.createElement('span');
+    tintHead.textContent = 'Оттенок';
+    const tintInput = document.createElement('input');
+    tintInput.type = 'color';
+    tintInput.value = rig.tint;
+    tintInput.addEventListener('input', () => {
+      rig.tint = tintInput.value;
+      if (ink) paintMarks();
+    });
+    tintRow.append(tintHead, tintInput);
+    pane.append(tintRow);
+    addSlider(pane, rig, 'Сила оттенка', 'tintAmount', 0, 1, 0.01, pct, ink);
+
+    const checks = document.createElement('div');
+    checks.className = 'checks';
+    const liftLabel = document.createElement('label');
+    const liftInput = document.createElement('input');
+    liftInput.type = 'checkbox';
+    liftInput.checked = rig.liftAway;
+    liftInput.addEventListener('change', () => { rig.liftAway = liftInput.checked; });
+    liftLabel.append(liftInput, document.createTextNode('Уводить после нажатия'));
+    checks.append(liftLabel);
+    pane.append(checks);
+    if (!ink) return;
+
+    function addSelect(label, value, options, onChange) {
+      const wrap = document.createElement('label');
+      wrap.className = 'row';
+      const head = document.createElement('span');
+      head.textContent = label;
+      const select = document.createElement('select');
+      for (const opt of options) {
+        const node = document.createElement('option');
+        node.value = opt.value;
+        node.textContent = opt.label;
+        select.append(node);
+      }
+      select.value = value;
+      select.addEventListener('change', () => onChange(select.value));
+      wrap.append(head, select);
+      pane.append(wrap);
+      return select;
+    }
+    addSelect('Следующее нажатие', rig.stack, [
+      { value: 'add', label: 'Добавить ещё оттиск' },
+      { value: 'replace', label: 'Заменить оттиск' },
+    ], (value) => { rig.stack = value; });
+    fileSelect = addSelect('Оттиск', rig.file, [
+      { value: 'random', label: 'Случайный' },
+      ...STAMP_IMPRINTS.map((item) => ({ value: item.file, label: item.file })),
+    ], (value) => {
+      rig.file = value;
+      refreshFiles();
+    });
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    nextLine = document.createElement('p');
+    lastLine = document.createElement('p');
+    lastLine.textContent = 'Последний: нет';
+    meta.append(nextLine, lastLine);
+    const thumbs = document.createElement('div');
+    thumbs.className = 'thumbs';
+    thumbButtons = STAMP_IMPRINTS.map((item) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.file = item.file;
+      btn.title = item.file;
+      const img = document.createElement('img');
+      img.alt = item.file;
+      img.src = item.src;
+      btn.append(img);
+      btn.addEventListener('click', () => {
+        rig.file = item.file;
+        fileSelect.value = item.file;
+        refreshFiles();
+      });
+      thumbs.append(btn);
+      return btn;
+    });
+    meta.append(thumbs);
+    pane.append(meta);
+  }
+
+  const tabs = document.createElement('div');
+  tabs.className = 'tabs';
+  const stampTab = document.createElement('button');
+  stampTab.type = 'button';
+  stampTab.textContent = 'Печать';
+  stampTab.className = 'on';
+  const appleTab = document.createElement('button');
+  appleTab.type = 'button';
+  appleTab.textContent = 'Яблоко';
+  tabs.append(stampTab, appleTab);
+  const stampPane = document.createElement('div');
+  stampPane.className = 'pane';
+  const applePane = document.createElement('div');
+  applePane.className = 'pane';
+  applePane.hidden = true;
+  fillPane(stampPane, stampRig, true);
+  fillPane(applePane, appleRig, false);
+  function showPane(which) {
+    const stampOn = which === 'stamp';
+    stampPane.hidden = !stampOn;
+    applePane.hidden = stampOn;
+    stampTab.classList.toggle('on', stampOn);
+    appleTab.classList.toggle('on', !stampOn);
+  }
+  stampTab.addEventListener('click', () => showPane('stamp'));
+  appleTab.addEventListener('click', () => showPane('apple'));
+  panel.append(tabs, stampPane, applePane);
+
   let alive = true;
+  let stampModel = null;
+  let appleModel = null;
   let model = null;
-  let playing = false;
-  let placed = false;
-  let want = false;
-  let startedAt = 0;
+  let phase = 'hidden';
+  let phaseU = 0;
+  let shot = null;
+  let queued = false;
+  let queuedPoint = null;
+  let pressN = 0;
+  let lastFile = '';
+  let lastNow = 0;
+  const marks = [];
 
-  function easeInCubic(t) { return t * t * t; }
-  function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2; }
-  function lerp(a, b, t) { return a + (b - a) * t; }
+  function refreshFiles() {
+    const show = stampRig.file === 'random' ? lastFile : stampRig.file;
+    nextLine.textContent = stampRig.file === 'random'
+      ? 'Дальше: случайный'
+      : 'Дальше: design/stamps/' + stampRig.file;
+    for (const btn of thumbButtons) btn.classList.toggle('on', !!show && btn.dataset.file === show);
+  }
+  refreshFiles();
 
-  function setScale(x, y, z) {
-    model.scale.set(SIZE * x, SIZE * y, SIZE * z);
+  function paintMarks() {
+    if (!marks.length || !host.isConnected) return;
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (w < 2 || h < 2) return;
+    const diam = (SIZE * stampRig.scale / viewH) * h;
+    const imgW = diam / INK_FRAC;
+    for (const mark of marks) {
+      mark.el.style.left = `calc(${mark.px * 100}% + ${stampRig.offsetX}px)`;
+      mark.el.style.top = `calc(${mark.py * 100}% + ${stampRig.offsetY}px)`;
+      mark.el.style.width = imgW + 'px';
+      mark.el.style.opacity = String(stampRig.opacity);
+      mark.el.style.filter = stampRig.blur > 0.01 ? `blur(${stampRig.blur}px)` : 'none';
+      mark.el.style.transform = `translate(-50%, -50%) rotate(${mark.rot}deg) scale(${mark.sx}, ${mark.sy})`;
+      mark.dye.style.opacity = String(stampRig.tintAmount);
+      mark.dye.style.background = stampRig.tint;
+    }
   }
 
-  function shade() {
-    const y = model.position.y;
-    const k = 1 - Math.min(Math.max(y, 0) / START_Y, 1);
-    shadow.material.opacity = 0.12 + k * 0.7;
-    const s = 1.28 - k * 0.32;
-    shadow.scale.set(s, s, 1);
+  function chooseFile() {
+    if (stampRig.file === 'random') {
+      return STAMP_IMPRINTS[Math.floor(Math.random() * STAMP_IMPRINTS.length)];
+    }
+    return STAMP_IMPRINTS.find((item) => item.file === stampRig.file) || STAMP_IMPRINTS[0];
   }
 
-  function begin(now) {
-    playing = true;
-    startedAt = now;
+  function sampleShot(point, rig, kind) {
+    const choice = kind === 'stamp' ? chooseFile() : { file: 'яблоко', src: '' };
+    const w = host.clientWidth || 1;
+    const h = host.clientHeight || 1;
+    const span = rig.jitter * (w / 1440);
+    return {
+      ...choice,
+      kind,
+      rig,
+      rot: (Math.random() * 2 - 1) * rig.rotation,
+      px: (point.px + (Math.random() * 2 - 1) * span) / w,
+      py: (point.py + (Math.random() * 2 - 1) * span) / h,
+      placed: false,
+    };
+  }
+
+  function placeInk(current) {
+    if (current.kind !== 'stamp' || current.placed) return;
+    current.placed = true;
+    if (stampRig.stack === 'replace') {
+      marks.forEach((mark) => mark.el.remove());
+      marks.length = 0;
+    }
+    const el = document.createElement('div');
+    el.className = 'sign-imprint';
+    const img = document.createElement('img');
+    img.className = 'ink';
+    img.alt = '';
+    img.draggable = false;
+    img.src = current.src;
+    const dye = document.createElement('div');
+    dye.className = 'dye';
+    dye.style.webkitMaskImage = `url("${current.src}")`;
+    dye.style.maskImage = `url("${current.src}")`;
+    el.append(img, dye);
+    layer.append(el);
+    const pressed = pressScales(stampRig.squash, 1);
+    marks.push({ el, dye, rot: current.rot, px: current.px, py: current.py, sx: pressed.x, sy: pressed.y });
+    lastLine.textContent = 'Поставлен: design/stamps/' + current.file;
+    paintMarks();
+  }
+
+  function motionSeconds(base, speed) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return (reduce ? base * 0.4 : base) / Math.max(0.25, speed);
+  }
+
+  function pressSeconds() {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches ? 0.08 : 0.2;
+  }
+
+  function targetOf(current) {
+    const w = host.clientWidth || 1;
+    const h = host.clientHeight || 1;
+    const px = current.px * w + current.rig.offsetX;
+    const py = current.py * h + current.rig.offsetY;
+    const size = SIZE * (current.kind === 'apple' ? current.rig.scale : 1);
+    return {
+      x: (px / w - 0.5) * viewW,
+      z: (py / h - 0.5) * viewH,
+      edge: viewH / 2 + size * 0.65,
+    };
+  }
+
+  function squashCurve(u) {
+    if (u < 0.55) return Math.sin((u / 0.55) * Math.PI / 2) * 1.12;
+    const v = (u - 0.55) / 0.45;
+    return 1.12 - 0.12 * (1 - (1 - v) ** 2);
+  }
+
+  function axisPose(prefix) {
+    const d = Math.PI / 180;
+    const rig = shot.rig;
+    return {
+      x: rig[prefix + 'X'] * d,
+      y: rig[prefix + 'Y'] * d,
+      z: rig[prefix + 'Z'] * d,
+    };
+  }
+
+  function lerpPose(a, b, t) {
+    return {
+      x: a.x + (b.x - a.x) * t,
+      y: a.y + (b.y - a.y) * t,
+      z: a.z + (b.z - a.z) * t,
+    };
+  }
+
+  function travelPose(u, from, via, to) {
+    if (u <= 0.5) return lerpPose(from, via, u / 0.5);
+    return lerpPose(via, to, (u - 0.5) / 0.5);
+  }
+
+  function poseFor(name, u) {
+    const start = axisPose('start');
+    const fly = axisPose('fly');
+    const press = axisPose('press');
+    if (name === 'descend') return travelPose(u, start, fly, press);
+    if (name === 'lift') return travelPose(u, press, fly, start);
+    return press;
+  }
+
+  function tintObject(root, rig) {
+    root.traverse((o) => {
+      if (!o.isMesh || !o.material) return;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      for (const m of mats) {
+        if (!m.userData.baseColor) m.userData.baseColor = m.color.clone();
+        m.color.copy(m.userData.baseColor);
+        if (rig.tintAmount > 0) m.color.lerp(new THREE.Color(rig.tint), rig.tintAmount);
+        m.transparent = rig.opacity < 0.999;
+        m.opacity = rig.opacity;
+        m.depthWrite = rig.opacity > 0.95;
+      }
+    });
+  }
+
+  function pressScales(squash, amount) {
+    const signed = amount * squash;
+    return {
+      x: Math.max(0.12, 1 + signed),
+      y: Math.max(0.12, 1 - signed * 1.35),
+    };
+  }
+
+  function applyPose(x, z, squashAmt, rot, presence, spin) {
+    const rig = shot.rig;
+    const size = SIZE * (shot.kind === 'apple' ? rig.scale : 1);
+    const pressed = pressScales(rig.squash, squashAmt);
+    const spread = pressed.x;
+    const squat = pressed.y;
+    const euler = spin || poseFor('press', 1);
+    if (stampModel) stampModel.visible = false;
+    if (appleModel) appleModel.visible = false;
+    model.scale.set(size * spread, size * squat, size * spread);
+    model.rotation.order = 'XYZ';
+    model.rotation.set(euler.x, euler.y - rot * Math.PI / 180, euler.z);
+    model.position.set(x, 0.02 - Math.min(1, squashAmt) * 0.012, z);
     model.visible = true;
+    if (shot.kind === 'apple') tintObject(model, rig);
     shadow.visible = true;
-    model.position.set(0, START_Y, 0);
-    model.rotation.set(-0.4, Math.PI * 0.8, 0.2);
-    setScale(1, 1, 1);
-    shade();
+    shadow.position.set(x + 0.04, 0.002, z + 0.03);
+    shadow.material.opacity = 0.1 + presence * 0.22 + Math.min(1, squashAmt) * 0.4;
+    shadow.scale.setScalar(1.12 - Math.min(1, squashAmt) * 0.1);
   }
 
-  function pose(now) {
-    if (!model) return;
-    if (!playing) {
-      if (placed) shade();
-      return;
-    }
-    const t = now - startedAt;
-    if (t < DROP) {
-      const k = easeInCubic(t / DROP);
-      const r = easeInOut(t / DROP);
-      model.position.set(0, lerp(START_Y, 0, k), 0);
-      model.rotation.set(lerp(-0.4, 0, r), lerp(Math.PI * 0.8, 0, r), lerp(0.2, 0, r));
-      setScale(1, 1, 1);
-      shade();
-      return;
-    }
-    if (t < DROP + PRESS) {
-      const s = Math.sin(((t - DROP) / PRESS) * Math.PI);
-      model.position.set(0, 0, 0);
-      model.rotation.set(0, 0, 0);
-      setScale(1 + s * 0.045, 1 - s * 0.09, 1 + s * 0.045);
-      shade();
-      return;
-    }
-    model.position.set(0, 0, 0);
-    model.rotation.set(0, 0, 0);
-    setScale(1, 1, 1);
-    shade();
-    playing = false;
-    placed = true;
-    host.classList.add('is-placed');
+  function kindReady(kind) {
+    return kind === 'apple' ? appleModel : stampModel;
   }
 
-  function onClick() {
-    if (!alive || playing || placed) return;
-    want = true;
-    if (model) begin(performance.now());
+  function start(point) {
+    const kind = pressN % 2 === 0 ? 'stamp' : 'apple';
+    const rig = kind === 'stamp' ? stampRig : appleRig;
+    model = kindReady(kind);
+    if (!model) {
+      queued = true;
+      queuedPoint = point;
+      return;
+    }
+    pressN += 1;
+    shot = sampleShot(point, rig, kind);
+    if (kind === 'stamp') {
+      lastFile = shot.file;
+      lastLine.textContent = 'Сейчас: design/stamps/' + shot.file;
+      refreshFiles();
+    } else {
+      lastLine.textContent = 'Сейчас: яблоко';
+    }
+    phase = 'descend';
+    phaseU = 0;
+    const goal = targetOf(shot);
+    applyPose(goal.x, goal.edge, 0, shot.rot, 0, poseFor('descend', 0));
+  }
+
+  function step(dt) {
+    if (!model || phase === 'hidden') return;
+    if (phase === 'rest') {
+      if (shot.rig.liftAway) {
+        phase = 'lift';
+        phaseU = 0;
+      } else if (shot) {
+        const goal = targetOf(shot);
+        applyPose(goal.x, goal.z, 1, shot.rot, 1, poseFor('press', 1));
+      }
+      return;
+    }
+    if (!shot) return;
+    const goal = targetOf(shot);
+    if (phase === 'descend') {
+      phaseU += dt / motionSeconds(0.62, shot.rig.descent);
+      const u = Math.min(1, phaseU);
+      const k = 1 - (1 - u) ** 3;
+      applyPose(goal.x, goal.edge + (goal.z - goal.edge) * k, 0, shot.rot, k, poseFor('descend', u));
+      if (u >= 1) { phase = 'press'; phaseU = 0; }
+    } else if (phase === 'press') {
+      phaseU += dt / pressSeconds();
+      const u = Math.min(1, phaseU);
+      applyPose(goal.x, goal.z, squashCurve(u), shot.rot, 1, poseFor('press', 1));
+      if (u >= 0.5) placeInk(shot);
+      if (u >= 1) { phase = 'dwell'; phaseU = 0; }
+    } else if (phase === 'repress') {
+      phaseU += dt / pressSeconds();
+      const u = Math.min(1, phaseU);
+      const sq = 1 + Math.sin(Math.min(1, u) * Math.PI) * 0.35;
+      applyPose(goal.x, goal.z, sq, shot.rot, 1, poseFor('press', 1));
+      if (u >= 0.2) placeInk(shot);
+      if (u >= 1) { phase = 'dwell'; phaseU = 0; }
+    } else if (phase === 'dwell') {
+      applyPose(goal.x, goal.z, 1, shot.rot, 1, poseFor('press', 1));
+      placeInk(shot);
+      if (shot.rig.dwell <= 0.001) {
+        phase = shot.rig.liftAway ? 'lift' : 'rest';
+        phaseU = 0;
+      } else {
+        phaseU += dt / shot.rig.dwell;
+        if (phaseU >= 1) {
+          phase = shot.rig.liftAway ? 'lift' : 'rest';
+          phaseU = 0;
+        }
+      }
+    } else if (phase === 'lift') {
+      phaseU += dt / motionSeconds(0.42, shot.rig.lift);
+      const u = Math.min(1, phaseU);
+      const k = u * u;
+      const release = Math.max(0, 1 - Math.min(1, u / 0.28));
+      applyPose(goal.x, goal.z + (goal.edge - goal.z) * k, release, shot.rot, 1 - k, poseFor('lift', u));
+      if (u >= 1) {
+        phase = 'hidden';
+        model.visible = false;
+        shadow.visible = false;
+      }
+    }
+  }
+
+  function onClick(e) {
+    if (!alive) return;
+    if (phase !== 'hidden' && phase !== 'rest') return;
+    const hr = host.getBoundingClientRect();
+    const point = { px: e.clientX - hr.left, py: e.clientY - hr.top };
+    start(point);
   }
   host.addEventListener('click', onClick);
+
+  function isTyping(el) {
+    while (el && el !== document.body) {
+      if (el.isContentEditable) return true;
+      const tag = el.tagName;
+      if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (tag === 'INPUT') {
+        const type = (el.type || 'text').toLowerCase();
+        return type !== 'range' && type !== 'checkbox' && type !== 'radio' && type !== 'button';
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  function onKey(e) {
+    if (e.repeat) return;
+    if (e.code === 'Escape' && !panel.hidden && !isTyping(e.target)) {
+      panel.hidden = true;
+      return;
+    }
+    if (e.code !== 'KeyG' || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (isTyping(e.target) || isTyping(document.activeElement)) return;
+    e.preventDefault();
+    panel.hidden = !panel.hidden;
+  }
+  addEventListener('keydown', onKey);
+  close.addEventListener('click', () => { panel.hidden = true; });
 
   function frame() {
     const w = host.clientWidth;
     const h = host.clientHeight;
     if (w < 2 || h < 2) return;
-    camera.aspect = w / h;
+    viewW = viewH * (w / h);
+    camera.top = viewH / 2;
+    camera.bottom = -viewH / 2;
+    camera.left = -viewW / 2;
+    camera.right = viewW / 2;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    paintMarks();
   }
   const ro = new ResizeObserver(frame);
   ro.observe(host);
   frame();
 
+  function mountTool(kind, fitted) {
+    const group = new THREE.Group();
+    group.add(fitted);
+    group.scale.setScalar(SIZE);
+    group.visible = false;
+    scene.add(group);
+    if (kind === 'stamp') stampModel = group;
+    else appleModel = group;
+    if (!queued || !queuedPoint) return;
+    const need = pressN % 2 === 0 ? 'stamp' : 'apple';
+    if (!kindReady(need)) return;
+    const point = queuedPoint;
+    queued = false;
+    queuedPoint = null;
+    start(point);
+  }
+
   new GLTFLoader().load('models/stamp_round.glb', (gltf) => {
     if (!alive) return;
-    model = prepareStamp(gltf.scene);
-    model.visible = false;
-    scene.add(model);
-    if (want && !playing && !placed) begin(performance.now());
+    mountTool('stamp', fitTopDown(prepareStamp(gltf.scene)));
+  });
+  new GLTFLoader().load('models/apple_half_green.glb', (gltf) => {
+    if (!alive) return;
+    mountTool('apple', prepareHalfApple(gltf));
   });
 
   renderer.setAnimationLoop((now) => {
     if (!alive) return;
-    pose(now);
+    const dt = lastNow ? Math.min(0.05, (now - lastNow) / 1000) : 0;
+    lastNow = now;
+    step(dt);
     renderer.render(scene, camera);
   });
 
   return () => {
     alive = false;
     host.removeEventListener('click', onClick);
+    removeEventListener('keydown', onKey);
     renderer.setAnimationLoop(null);
     ro.disconnect();
-    pmrem.dispose();
     renderer.dispose();
+    panel.remove();
+    layer.remove();
   };
 }
 
@@ -1131,8 +1725,9 @@ function mountBandDrops(root) {
   let pending = -1;
   let landX = 0;
   let landZ = 0;
-  const UP = 620;
-  const DOWN = 480;
+  let offZ = 0;
+  let upMs = 620;
+  let downMs = 340;
   const SIZE = 0.46;
 
   function frame() {
@@ -1160,6 +1755,11 @@ function mountBandDrops(root) {
     };
   }
 
+  function pageBottomZ() {
+    const radiusPx = (SIZE / 2) * innerHeight / 2 + 36;
+    return worldOf(innerWidth / 2, innerHeight + radiusPx).z;
+  }
+
   function begin(index, now) {
     const actor = actors[index];
     if (!actor) {
@@ -1168,12 +1768,27 @@ function mountBandDrops(root) {
     }
     actors.forEach((item) => { if (item) item.visible = false; });
     const band = bands[index].getBoundingClientRect();
-    const sx = Math.max(innerWidth * 0.22, Math.min(innerWidth * 0.78, band.left + band.width / 2));
-    const sy = Math.max(innerHeight * 0.28, Math.min(innerHeight * 0.62, band.top + band.height / 2));
-    const spot = worldOf(sx, sy);
+    const visTop = Math.max(band.top, 0);
+    const visBot = Math.min(band.bottom, innerHeight);
+    const sy = visTop < visBot ? (visTop + visBot) / 2 : band.top + band.height / 2;
+    const spot = worldOf(band.left + band.width / 2, sy);
     landX = spot.x;
     landZ = spot.z;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const bottom = pageBottomZ();
+    if (reduce) {
+      const hop = Math.abs(worldOf(0, 96).z - worldOf(0, 0).z);
+      offZ = landZ + Math.min(hop, Math.abs(bottom - landZ));
+      upMs = 200;
+      downMs = 160;
+    } else {
+      offZ = bottom;
+      upMs = 620;
+      downMs = 340;
+    }
     actor.visible = true;
+    actor.rotation.set(0, 0, 0);
+    actor.position.set(landX, 0.03, offZ);
     actor.scale.setScalar(SIZE);
     shadow.visible = true;
     playing = true;
@@ -1184,28 +1799,28 @@ function mountBandDrops(root) {
   function pose(now) {
     const actor = actors.find((item) => item && item.visible);
     if (!playing || !actor) return;
-    const radiusPx = (SIZE / 2) * innerHeight / 2 + 18;
-    const below = worldOf(innerWidth / 2, innerHeight + radiusPx);
     const t = now - startedAt;
     let k;
     let z;
-    if (t < UP) {
-      k = 1 - (1 - t / UP) ** 3;
-      z = landZ + (below.z - landZ) * (1 - k);
-    } else if (t < UP + DOWN) {
-      k = ((t - UP) / DOWN) ** 3;
-      z = landZ + (below.z - landZ) * k;
+    if (t < upMs) {
+      k = 1 - (1 - t / upMs) ** 3;
+      z = landZ + (offZ - landZ) * (1 - k);
+    } else if (t < upMs + downMs) {
+      const u = (t - upMs) / downMs;
+      k = 1 - (1 - u) ** 2;
+      z = landZ + (offZ - landZ) * k;
     } else {
       actor.visible = false;
       shadow.visible = false;
       playing = false;
       return;
     }
+    actor.rotation.set(0, 0, 0);
     actor.position.set(landX, 0.03, z);
-    shadow.position.set(landX + 0.1, 0.002, z + 0.12);
-    const settled = t < UP ? k : 1 - k;
-    shadow.material.opacity = 0.2 + settled * 0.65;
-    shadow.scale.setScalar(1.15 - settled * 0.18);
+    shadow.position.set(landX + 0.02, 0.002, z + 0.03);
+    const settled = t < upMs ? k : 1 - k;
+    shadow.material.opacity = 0.15 + settled * 0.5;
+    shadow.scale.setScalar(1.05 - settled * 0.1);
   }
 
   const stops = bands.map((band, index) => {
@@ -1238,7 +1853,7 @@ function mountBandDrops(root) {
     const built = [
       prepareApple(appleGltf, APPLE_RED),
       prepareGreenStamp(stampGltf),
-      prepareApple(appleGltf, APPLE_GREEN),
+      prepareApple(appleGltf, null),
       prepareGreenStamp(stampGltf),
     ];
     built.forEach((fitted, i) => {
@@ -1269,11 +1884,9 @@ function mountBandDrops(root) {
 }
 
 function mountBoardFx(root) {
-  const stopHeader = mountHeaderStamp(root.querySelector('.peek'));
   const stopSign = mountSignStamp(root.querySelector('.signoff'));
   const stopBands = mountBandDrops(root);
   return () => {
-    stopHeader();
     stopSign();
     stopBands();
   };
@@ -1298,10 +1911,12 @@ function mountScroller(scroller, index) {
   let drag = null;
   let wrapping = false;
   let primed = dir > 0;
+  let pos = scroller.scrollLeft;
 
   function park(next) {
     const loop = loopWidth();
     if (loop > 0) next = ((next % loop) + loop) % loop;
+    pos = next;
     wrapping = true;
     scroller.scrollLeft = next;
     wrapping = false;
@@ -1332,20 +1947,12 @@ function mountScroller(scroller, index) {
     const loop = loopWidth();
     if (loop <= 0 || wrapping) return;
     const x = scroller.scrollLeft;
-    if (x >= loop) {
-      wrapping = true;
-      scroller.scrollLeft = x - loop;
-      wrapping = false;
-    } else if (x < 0) {
-      wrapping = true;
-      scroller.scrollLeft = x + loop;
-      wrapping = false;
-    }
+    if (x >= loop) park(x - loop);
+    else if (x < 0) park(x + loop);
   }
 
   function onWheel(event) {
-    const horizontal = event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY);
-    if (horizontal) event.preventDefault();
+    if (!wheelScrollsPage(event)) event.preventDefault();
   }
 
   function onScroll() {
@@ -1364,6 +1971,7 @@ function mountScroller(scroller, index) {
     const loop = loopWidth();
     let next = drag.left - (event.clientX - drag.x);
     if (loop > 0) next = ((next % loop) + loop) % loop;
+    pos = next;
     scroller.scrollLeft = next;
   }
 
@@ -1388,7 +1996,8 @@ function mountScroller(scroller, index) {
   let last = performance.now();
   function tick(now) {
     if (!alive) return;
-    const dt = Math.min(0.05, (now - last) / 1000);
+    watchPageScroll();
+    const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
     const loop = loopWidth();
     if (loop > 0 && !primed) {
@@ -1396,7 +2005,8 @@ function mountScroller(scroller, index) {
       park(loop);
     }
     if (!motion.matches && !drag && loop > 0) {
-      park(scroller.scrollLeft + dir * STRIP_SPEED * (loop / STRIP_W) * dt);
+      const boost = stripBoost();
+      park(pos + dir * STRIP_SPEED * boost * (loop / STRIP_W) * dt);
     }
     requestAnimationFrame(tick);
   }
@@ -1415,7 +2025,11 @@ function paint(name) {
   }
   document.body.dataset.route = name;
   app.innerHTML = TEMPLATES[name]();
-  if (name === 'board') unmountStrip = mountStrip(app);
+  if (name === 'board') {
+    grab = null;
+    document.body.style.cursor = '';
+    unmountStrip = mountStrip(app);
+  }
 }
 
 function nearestTurn(target, current) {
@@ -1449,6 +2063,13 @@ paint(route);
   fy = destFy = a.fy;
   phase = route === 'hero' ? 'scroll' : 'rest';
 }
+
+addEventListener('click', (e) => {
+  const link = e.target.closest('a.mark');
+  if (!link || parseRoute() !== 'board') return;
+  e.preventDefault();
+  scrollTo(0, 0);
+});
 
 addEventListener('hashchange', () => {
   const next = parseRoute();
@@ -1822,6 +2443,7 @@ function pointerHitsApple(event) {
 
 addEventListener('pointerdown', (event) => {
   if (event.button !== 0 || !ready) return;
+  if (document.body.dataset.route === 'board') return;
   if (overInteractive(event)) return;
   if (!pointerHitsApple(event)) return;
   grab = { id: event.pointerId, x: event.clientX, y: event.clientY };
@@ -1830,6 +2452,11 @@ addEventListener('pointerdown', (event) => {
 });
 
 addEventListener('pointermove', (event) => {
+  if (document.body.dataset.route === 'board') {
+    if (grab) grab = null;
+    if (document.body.style.cursor) document.body.style.cursor = '';
+    return;
+  }
   if (grab && event.pointerId === grab.id) {
     const dx = event.clientX - grab.x;
     const dy = event.clientY - grab.y;
