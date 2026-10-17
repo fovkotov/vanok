@@ -774,53 +774,27 @@ let dragYaw = 0, dragPitch = 0;
 let grab = null;
 
 const STRIP_SPEED = 30;
-const STRIP_BOOST_MS = 280;
-const STRIP_BOOST_IN = 120;
-const STRIP_BOOST_OUT = 300;
-let stripBoostUntil = 0;
-let boostShown = 1;
-let boostFrom = 1;
-let boostTo = 1;
-let boostT0 = 0;
+const pageScroll = { boost: 15 };
+let pageScrollSample = 0;
+let pageScrollY = 0;
+let pageScrollReady = false;
+let pageScrollOn = false;
 
-function noteStripBoost() {
-  stripBoostUntil = performance.now() + STRIP_BOOST_MS;
-}
-
-function stripBoost() {
-  const want = performance.now() < stripBoostUntil ? 2 : 1;
-  const now = performance.now();
-  if (want !== boostTo) {
-    boostFrom = boostShown;
-    boostTo = want;
-    boostT0 = now;
+// 15× only on frames where the page itself moved. Stops the same frame the scroll stops.
+function pageScrollMult(now) {
+  if (now - pageScrollSample > 8) {
+    pageScrollSample = now;
+    const y = (document.scrollingElement || document.documentElement).scrollTop;
+    if (!pageScrollReady) {
+      pageScrollReady = true;
+      pageScrollY = y;
+      pageScrollOn = false;
+    } else {
+      pageScrollOn = y !== pageScrollY;
+      pageScrollY = y;
+    }
   }
-  const dur = boostTo > boostFrom ? STRIP_BOOST_IN : STRIP_BOOST_OUT;
-  const u = dur <= 0 ? 1 : Math.min(1, (now - boostT0) / dur);
-  const e = u * u * (3 - 2 * u);
-  boostShown = boostFrom + (boostTo - boostFrom) * e;
-  return boostShown;
-}
-
-let lastPageY = null;
-function pageScrollY() {
-  const root = document.scrollingElement;
-  return Math.max(
-    window.scrollY || 0,
-    root ? root.scrollTop : 0,
-    document.body.scrollTop || 0
-  );
-}
-function watchPageScroll() {
-  const y = pageScrollY();
-  if (lastPageY === null) {
-    lastPageY = y;
-    return;
-  }
-  if (y !== lastPageY) {
-    lastPageY = y;
-    noteStripBoost();
-  }
+  return pageScrollOn ? pageScroll.boost : 1;
 }
 
 // Any vertical wheel component scrolls the page, even when deltaX is larger.
@@ -829,28 +803,6 @@ function wheelScrollsPage(event) {
   return Math.abs(event.deltaY) > 0;
 }
 
-function onPageScroll(event) {
-  const target = event.target;
-  if (target instanceof Element && target.closest('.scroller')) return;
-  noteStripBoost();
-}
-document.addEventListener('wheel', (event) => {
-  if (wheelScrollsPage(event)) noteStripBoost();
-}, { capture: true, passive: true });
-window.addEventListener('scroll', onPageScroll, { capture: true, passive: true });
-document.addEventListener('scroll', onPageScroll, { capture: true, passive: true });
-if (document.scrollingElement) {
-  document.scrollingElement.addEventListener('scroll', onPageScroll, { passive: true });
-}
-document.body.addEventListener('scroll', onPageScroll, { passive: true });
-addEventListener('touchmove', noteStripBoost, { passive: true });
-addEventListener('keydown', (event) => {
-  const tag = event.target && event.target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-  if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || event.key === 'PageUp' || event.key === 'PageDown' || event.key === 'Home' || event.key === 'End' || event.key === ' ') {
-    noteStripBoost();
-  }
-});
 const STRIP_W = 4087;
 let unmountStrip = null;
 
@@ -982,11 +934,16 @@ function prepareGreenStamp(gltf) {
 // «sign here»: печать выезжает из-за нижнего края в точку клика, строго сверху,
 // оставляет оттиск там и уходит обратно вниз. G — настройки этого жеста, только на время вкладки.
 const STAMP_IMPRINTS = [
-  { file: 'frame-247.png', src: 'design/stamps/frame-247.png' },
-  { file: 'frame-279.png', src: 'design/stamps/frame-279.png' },
-  { file: 'frame-280.png', src: 'design/stamps/frame-280.png' },
+  { file: 'stamp-01.png', src: 'design/stamps/stamp-01.png' },
+  { file: 'stamp-02.png', src: 'design/stamps/stamp-02.png' },
+  { file: 'stamp-03.png', src: 'design/stamps/stamp-03.png' },
 ];
-const INK_FRAC = 575 / 1200;
+const APPLE_IMPRINTS = [
+  { file: 'apple-01.png', src: 'design/stamps/apple-01.png' },
+  { file: 'apple-02.png', src: 'design/stamps/apple-02.png' },
+  { file: 'apple-03.png', src: 'design/stamps/apple-03.png' },
+];
+const INK_FRAC = 505 / 539;
 
 function mountSignStamp(host) {
   if (!host) return () => {};
@@ -1039,6 +996,7 @@ function mountSignStamp(host) {
     dwell: 0.34,
     lift: 1.2,
     scale: 1,
+    printScale: 1,
     rotation: 8,
     startX: 0, startY: 0, startZ: 0,
     flyX: 0, flyY: 0, flyZ: 0,
@@ -1060,7 +1018,8 @@ function mountSignStamp(host) {
   stampRig.squash = -0.1;
   stampRig.dwell = 0.12;
   stampRig.lift = 1.55;
-  stampRig.scale = 1;
+  stampRig.scale = 0.97;
+  stampRig.printScale = 1.12;
   stampRig.rotation = 8;
   stampRig.startX = -31.2;
   stampRig.startY = 72.7;
@@ -1103,8 +1062,9 @@ function mountSignStamp(host) {
   appleRig.blur = 0;
   appleRig.tintAmount = 0;
   appleRig.liftAway = true;
+  appleRig.imprintRot = appleRig.pressY;
 
-  for (const item of STAMP_IMPRINTS) {
+  for (const item of [...STAMP_IMPRINTS, ...APPLE_IMPRINTS]) {
     const preload = new Image();
     preload.src = item.src;
   }
@@ -1127,10 +1087,8 @@ function mountSignStamp(host) {
 
   const pct = (n) => Math.round(n * 100) + '%';
   const deg = (n) => n.toFixed(1) + '°';
-  let nextLine = null;
-  let lastLine = null;
-  let fileSelect = null;
-  let thumbButtons = [];
+  const fileUis = [];
+  const appleAngle = {};
 
   function addSlider(parent, rig, label, key, min, max, step, format, visual) {
     const wrap = document.createElement('label');
@@ -1146,10 +1104,21 @@ function mountSignStamp(host) {
     input.step = String(step);
     input.value = String(rig[key]);
     const sync = () => { val.textContent = format(Number(input.value)); };
+    if (rig === appleRig && (key === 'imprintRot' || key === 'pressY')) appleAngle[key] = { input, sync };
     input.addEventListener('input', () => {
-      rig[key] = Number(input.value);
+      const value = Number(input.value);
+      rig[key] = value;
+      if (rig === appleRig && (key === 'imprintRot' || key === 'pressY')) {
+        const other = key === 'imprintRot' ? 'pressY' : 'imprintRot';
+        rig[other] = value;
+        const peer = appleAngle[other];
+        if (peer && peer.input !== input) {
+          peer.input.value = String(value);
+          peer.sync();
+        }
+      }
       sync();
-      if (visual && rig === stampRig) paintMarks();
+      paintMarks();
     });
     sync();
     head.append(name, val);
@@ -1163,14 +1132,17 @@ function mountSignStamp(host) {
     addSlider(parent, rig, title + ' Z', prefix + 'Z', -180, 180, 0.1, deg, false);
   }
 
-  function fillPane(pane, rig, ink) {
-    const scaleLabel = ink ? 'Масштаб оттиска' : 'Масштаб';
+  function fillPane(pane, rig, ink, prints) {
     addSlider(pane, rig, 'Скорость спуска', 'descent', 0.4, 2.6, 0.05, (n) => n.toFixed(2) + '×', false);
     addSlider(pane, rig, 'Сжатие при нажатии', 'squash', -0.8, 0.8, 0.01, pct, false);
     addSlider(pane, rig, 'Удержание', 'dwell', 0, 1.6, 0.01, (n) => n.toFixed(2) + ' с', false);
     addSlider(pane, rig, 'Скорость подъёма', 'lift', 0.4, 2.6, 0.05, (n) => n.toFixed(2) + '×', false);
-    addSlider(pane, rig, scaleLabel, 'scale', 0.4, 1.8, 0.01, pct, ink);
+    if (ink) {
+      addSlider(pane, rig, 'Масштаб при печати', 'printScale', 0.2, 2.5, 0.01, pct, false);
+      addSlider(pane, rig, 'Масштаб принта после печати', 'scale', 0.2, 2.5, 0.01, pct, true);
+    } else addSlider(pane, rig, 'Масштаб', 'scale', 0.4, 1.8, 0.01, pct, false);
     addSlider(pane, rig, 'Поворот', 'rotation', 0, 45, 1, (n) => '±' + Math.round(n) + '°', false);
+    if (!ink) addSlider(pane, rig, 'Поворот печати', 'imprintRot', -180, 180, 0.1, deg, true);
     addAxes(pane, rig, 'Поворот на старте', 'start');
     addAxes(pane, rig, 'Поворот в полёте', 'fly');
     addAxes(pane, rig, 'Поворот при печати', 'press');
@@ -1189,7 +1161,7 @@ function mountSignStamp(host) {
     tintInput.value = rig.tint;
     tintInput.addEventListener('input', () => {
       rig.tint = tintInput.value;
-      if (ink) paintMarks();
+      paintMarks();
     });
     tintRow.append(tintHead, tintInput);
     pane.append(tintRow);
@@ -1205,8 +1177,9 @@ function mountSignStamp(host) {
     liftLabel.append(liftInput, document.createTextNode('Уводить после нажатия'));
     checks.append(liftLabel);
     pane.append(checks);
-    if (!ink) return;
+    if (!prints) return;
 
+    const ui = { kind: ink ? 'stamp' : 'apple', rig, lastPlaced: '' };
     function addSelect(label, value, options, onChange) {
       const wrap = document.createElement('label');
       wrap.className = 'row';
@@ -1229,9 +1202,9 @@ function mountSignStamp(host) {
       { value: 'add', label: 'Добавить ещё оттиск' },
       { value: 'replace', label: 'Заменить оттиск' },
     ], (value) => { rig.stack = value; });
-    fileSelect = addSelect('Оттиск', rig.file, [
+    ui.select = addSelect('Оттиск', rig.file, [
       { value: 'random', label: 'Случайный' },
-      ...STAMP_IMPRINTS.map((item) => ({ value: item.file, label: item.file })),
+      ...prints.map((item) => ({ value: item.file, label: item.file })),
     ], (value) => {
       rig.file = value;
       refreshFiles();
@@ -1239,13 +1212,13 @@ function mountSignStamp(host) {
 
     const meta = document.createElement('div');
     meta.className = 'meta';
-    nextLine = document.createElement('p');
-    lastLine = document.createElement('p');
-    lastLine.textContent = 'Последний: нет';
-    meta.append(nextLine, lastLine);
+    ui.next = document.createElement('p');
+    ui.last = document.createElement('p');
+    ui.last.textContent = 'Последний: нет';
+    meta.append(ui.next, ui.last);
     const thumbs = document.createElement('div');
     thumbs.className = 'thumbs';
-    thumbButtons = STAMP_IMPRINTS.map((item) => {
+    ui.thumbs = prints.map((item) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.dataset.file = item.file;
@@ -1256,7 +1229,7 @@ function mountSignStamp(host) {
       btn.append(img);
       btn.addEventListener('click', () => {
         rig.file = item.file;
-        fileSelect.value = item.file;
+        ui.select.value = item.file;
         refreshFiles();
       });
       thumbs.append(btn);
@@ -1264,6 +1237,7 @@ function mountSignStamp(host) {
     });
     meta.append(thumbs);
     pane.append(meta);
+    fileUis.push(ui);
   }
 
   const tabs = document.createElement('div');
@@ -1281,8 +1255,8 @@ function mountSignStamp(host) {
   const applePane = document.createElement('div');
   applePane.className = 'pane';
   applePane.hidden = true;
-  fillPane(stampPane, stampRig, true);
-  fillPane(applePane, appleRig, false);
+  fillPane(stampPane, stampRig, true, STAMP_IMPRINTS);
+  fillPane(applePane, appleRig, false, APPLE_IMPRINTS);
   function showPane(which) {
     const stampOn = which === 'stamp';
     stampPane.hidden = !stampOn;
@@ -1292,7 +1266,9 @@ function mountSignStamp(host) {
   }
   stampTab.addEventListener('click', () => showPane('stamp'));
   appleTab.addEventListener('click', () => showPane('apple'));
-  panel.append(tabs, stampPane, applePane);
+  const scrollHost = document.createElement('div');
+  addSlider(scrollHost, pageScroll, 'Ускорение лент при скролле', 'boost', 1, 30, 0.5, (n) => n.toFixed(1) + '×', false);
+  panel.append(scrollHost, tabs, stampPane, applePane);
 
   let alive = true;
   let stampModel = null;
@@ -1304,67 +1280,29 @@ function mountSignStamp(host) {
   let queued = false;
   let queuedPoint = null;
   let pressN = 0;
-  let lastFile = '';
   let lastNow = 0;
   const marks = [];
 
   function refreshFiles() {
-    const show = stampRig.file === 'random' ? lastFile : stampRig.file;
-    nextLine.textContent = stampRig.file === 'random'
-      ? 'Дальше: случайный'
-      : 'Дальше: design/stamps/' + stampRig.file;
-    for (const btn of thumbButtons) btn.classList.toggle('on', !!show && btn.dataset.file === show);
+    for (const ui of fileUis) {
+      const show = ui.rig.file === 'random' ? ui.lastPlaced : ui.rig.file;
+      ui.next.textContent = ui.rig.file === 'random'
+        ? 'Дальше: случайный'
+        : 'Дальше: ' + ui.rig.file;
+      for (const btn of ui.thumbs) btn.classList.toggle('on', !!show && btn.dataset.file === show);
+    }
   }
   refreshFiles();
 
-  function paintMarks() {
-    if (!marks.length || !host.isConnected) return;
-    const w = host.clientWidth;
-    const h = host.clientHeight;
-    if (w < 2 || h < 2) return;
-    const diam = (SIZE * stampRig.scale / viewH) * h;
-    const imgW = diam / INK_FRAC;
-    for (const mark of marks) {
-      mark.el.style.left = `calc(${mark.px * 100}% + ${stampRig.offsetX}px)`;
-      mark.el.style.top = `calc(${mark.py * 100}% + ${stampRig.offsetY}px)`;
-      mark.el.style.width = imgW + 'px';
-      mark.el.style.opacity = String(stampRig.opacity);
-      mark.el.style.filter = stampRig.blur > 0.01 ? `blur(${stampRig.blur}px)` : 'none';
-      mark.el.style.transform = `translate(-50%, -50%) rotate(${mark.rot}deg) scale(${mark.sx}, ${mark.sy})`;
-      mark.dye.style.opacity = String(stampRig.tintAmount);
-      mark.dye.style.background = stampRig.tint;
-    }
-  }
-
-  function chooseFile() {
-    if (stampRig.file === 'random') {
-      return STAMP_IMPRINTS[Math.floor(Math.random() * STAMP_IMPRINTS.length)];
-    }
-    return STAMP_IMPRINTS.find((item) => item.file === stampRig.file) || STAMP_IMPRINTS[0];
-  }
-
-  function sampleShot(point, rig, kind) {
-    const choice = kind === 'stamp' ? chooseFile() : { file: 'яблоко', src: '' };
-    const w = host.clientWidth || 1;
-    const h = host.clientHeight || 1;
-    const span = rig.jitter * (w / 1440);
-    return {
-      ...choice,
-      kind,
-      rig,
-      rot: (Math.random() * 2 - 1) * rig.rotation,
-      px: (point.px + (Math.random() * 2 - 1) * span) / w,
-      py: (point.py + (Math.random() * 2 - 1) * span) / h,
-      placed: false,
-    };
-  }
-
   function placeInk(current) {
-    if (current.kind !== 'stamp' || current.placed) return;
+    if (current.placed || !current.src) return;
     current.placed = true;
-    if (stampRig.stack === 'replace') {
-      marks.forEach((mark) => mark.el.remove());
-      marks.length = 0;
+    if (current.rig.stack === 'replace') {
+      for (let i = marks.length - 1; i >= 0; i--) {
+        if (marks[i].kind !== current.kind) continue;
+        marks[i].el.remove();
+        marks.splice(i, 1);
+      }
     }
     const el = document.createElement('div');
     el.className = 'sign-imprint';
@@ -1379,10 +1317,65 @@ function mountSignStamp(host) {
     dye.style.maskImage = `url("${current.src}")`;
     el.append(img, dye);
     layer.append(el);
-    const pressed = pressScales(stampRig.squash, 1);
-    marks.push({ el, dye, rot: current.rot, px: current.px, py: current.py, sx: pressed.x, sy: pressed.y });
-    lastLine.textContent = 'Поставлен: design/stamps/' + current.file;
+    marks.push({
+      el,
+      dye,
+      kind: current.kind,
+      rot: current.rot,
+      px: current.px,
+      py: current.py,
+    });
+    const ui = fileUis.find((item) => item.kind === current.kind);
+    if (ui) {
+      ui.lastPlaced = current.file;
+      ui.last.textContent = 'Поставлен: ' + current.file;
+    }
     paintMarks();
+  }
+  function chooseFile(kind) {
+    const list = kind === 'apple' ? APPLE_IMPRINTS : STAMP_IMPRINTS;
+    const rig = kind === 'apple' ? appleRig : stampRig;
+    if (rig.file === 'random') {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+    return list.find((item) => item.file === rig.file) || list[0];
+  }
+
+  function sampleShot(point, rig, kind) {
+    const choice = chooseFile(kind);
+    const w = host.clientWidth || 1;
+    const h = host.clientHeight || 1;
+    const span = rig.jitter * (w / 1440);
+    return {
+      ...choice,
+      kind,
+      rig,
+      rot: (Math.random() * 2 - 1) * rig.rotation,
+      px: (point.px + (Math.random() * 2 - 1) * span) / w,
+      py: (point.py + (Math.random() * 2 - 1) * span) / h,
+      placed: false,
+    };
+  }
+
+  function paintMarks() {
+    if (!marks.length || !host.isConnected) return;
+    const h = host.clientHeight;
+    if (host.clientWidth < 2 || h < 2) return;
+    for (const mark of marks) {
+      const rig = mark.kind === 'apple' ? appleRig : stampRig;
+      const imgW = mark.kind === 'apple'
+        ? (SIZE * rig.scale / viewH) * h
+        : ((SIZE * rig.scale / viewH) * h) / INK_FRAC;
+      mark.el.style.left = `calc(${mark.px * 100}% + ${rig.offsetX}px)`;
+      mark.el.style.top = `calc(${mark.py * 100}% + ${rig.offsetY}px)`;
+      mark.el.style.width = imgW + 'px';
+      mark.el.style.opacity = String(rig.opacity);
+      mark.el.style.filter = rig.blur > 0.01 ? `blur(${rig.blur}px)` : 'none';
+      const rot = mark.kind === 'apple' ? rig.pressY - mark.rot : mark.rot;
+      mark.el.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+      mark.dye.style.opacity = String(rig.tintAmount);
+      mark.dye.style.background = rig.tint;
+    }
   }
 
   function motionSeconds(base, speed) {
@@ -1399,7 +1392,7 @@ function mountSignStamp(host) {
     const h = host.clientHeight || 1;
     const px = current.px * w + current.rig.offsetX;
     const py = current.py * h + current.rig.offsetY;
-    const size = SIZE * (current.kind === 'apple' ? current.rig.scale : 1);
+    const size = SIZE * (current.kind === 'apple' ? current.rig.scale : current.rig.printScale);
     return {
       x: (px / w - 0.5) * viewW,
       z: (py / h - 0.5) * viewH,
@@ -1470,7 +1463,7 @@ function mountSignStamp(host) {
 
   function applyPose(x, z, squashAmt, rot, presence, spin) {
     const rig = shot.rig;
-    const size = SIZE * (shot.kind === 'apple' ? rig.scale : 1);
+    const size = SIZE * (shot.kind === 'apple' ? rig.scale : rig.printScale);
     const pressed = pressScales(rig.squash, squashAmt);
     const spread = pressed.x;
     const squat = pressed.y;
@@ -1504,13 +1497,9 @@ function mountSignStamp(host) {
     }
     pressN += 1;
     shot = sampleShot(point, rig, kind);
-    if (kind === 'stamp') {
-      lastFile = shot.file;
-      lastLine.textContent = 'Сейчас: design/stamps/' + shot.file;
-      refreshFiles();
-    } else {
-      lastLine.textContent = 'Сейчас: яблоко';
-    }
+    const ui = fileUis.find((item) => item.kind === kind);
+    if (ui) ui.last.textContent = 'Сейчас: ' + shot.file;
+    refreshFiles();
     phase = 'descend';
     phaseU = 0;
     const goal = targetOf(shot);
@@ -1996,8 +1985,7 @@ function mountScroller(scroller, index) {
   let last = performance.now();
   function tick(now) {
     if (!alive) return;
-    watchPageScroll();
-    const dt = Math.min(0.25, (now - last) / 1000);
+    const dt = (now - last) / 1000;
     last = now;
     const loop = loopWidth();
     if (loop > 0 && !primed) {
@@ -2005,8 +1993,8 @@ function mountScroller(scroller, index) {
       park(loop);
     }
     if (!motion.matches && !drag && loop > 0) {
-      const boost = stripBoost();
-      park(pos + dir * STRIP_SPEED * boost * (loop / STRIP_W) * dt);
+      const mult = pageScrollMult(now);
+      park(pos + dir * STRIP_SPEED * mult * (loop / STRIP_W) * dt);
     }
     requestAnimationFrame(tick);
   }
