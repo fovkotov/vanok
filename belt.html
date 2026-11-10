@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vanök — belt</title>
+<link rel="icon" href="design/stub/favicon.png" type="image/png">
+<style>
+  :root {
+    --bg: #434343;
+    --blue: #8CC88C;
+    --grotesk: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    --gap: clamp(18px, 2.1vw, 36px);
+    --seam-extra: 0px;
+    --vv-lift: 0px;
+  }
+  html[data-theme="1"] {
+    --blue: #8A7E59;
+    --bg: hsl(303.8182deg 100% 78.4314%);
+  }
+  html[data-theme="2"] {
+    --blue: #E3F4E8;
+    --bg: linear-gradient(180deg, #A59D90 0%, #02DD67 100%);
+  }
+  html[data-theme="3"] {
+    --blue: #ffffff;
+    --bg: #80a6bc;
+  }
+  html[data-theme="3"] .chrome .site-credits { color: #ffffff; }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg) fixed;
+  }
+  body {
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--blue);
+    font-family: var(--grotesk);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .chrome {
+    --hk: calc(100vw / 1440);
+    --grid-margin: 12px;
+    --grid-gutter: 12px;
+    --col: calc((100vw - 2 * var(--grid-margin) - 11 * var(--grid-gutter)) / 12);
+    --letter-w: calc(6 * var(--col) + 5 * var(--grid-gutter));
+    --letter-left: calc(var(--grid-margin) + 6 * (var(--col) + var(--grid-gutter)));
+    --wordmark-top: calc(6 * var(--hk));
+    position: relative;
+    z-index: 5;
+    flex: none;
+    height: calc(12px + var(--letter-w) * 233 / 702);
+    color: var(--blue);
+    pointer-events: none;
+  }
+  .chrome .crosshair,
+  .chrome .ig-link,
+  .chrome .catalog-entry,
+  .chrome .site-credits,
+  .chrome .soon { pointer-events: auto; }
+  .chrome > * { position: absolute; }
+  .chrome p { margin: 0; }
+  .chrome img { display: block; max-width: none; }
+  .chrome .vanok,
+  .chrome .regular,
+  .chrome .lettering { display: none; }
+  html[data-theme="1"] .chrome .lettering-1,
+  html[data-theme="2"] .chrome .lettering-2,
+  html[data-theme="3"] .chrome .lettering-3 { display: block; }
+  html[data-theme="1"] .chrome .wordmark,
+  html[data-theme="2"] .chrome .wordmark,
+  html[data-theme="3"] .chrome .wordmark { display: none; }
+
+  .chrome .crosshair,
+  .chrome .catalog-entry {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font: inherit;
+    cursor: pointer;
+  }
+  .chrome .crosshair {
+    z-index: 9;
+    left: calc(11.06 * var(--hk));
+    top: calc(11.23 * var(--hk));
+    width: calc(21.535 * var(--hk));
+    height: calc(21.535 * var(--hk));
+    line-height: 0;
+  }
+  .chrome .crosshair svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .chrome .bio,
+  .chrome .soon {
+    font-size: calc(14 * var(--hk));
+    line-height: normal;
+    white-space: nowrap;
+  }
+  .chrome .bio {
+    left: calc(var(--grid-margin) + var(--col) + var(--grid-gutter));
+    top: calc(12 * var(--hk));
+    line-height: calc(16 * var(--hk));
+  }
+  .chrome .soon {
+    top: calc(12 * var(--hk));
+    right: var(--grid-margin);
+    color: inherit;
+    text-decoration: none;
+  }
+  .chrome .ig-link,
+  .chrome .catalog-entry {
+    z-index: 3;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font: inherit;
+    line-height: normal;
+    text-decoration-line: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+    white-space: nowrap;
+    cursor: pointer;
+    top: calc(12 * var(--hk));
+    font-size: calc(14 * var(--hk));
+  }
+  .chrome .ig-link { left: var(--letter-left); }
+  .chrome .catalog-entry {
+    left: calc(var(--grid-margin) + 9 * (var(--col) + var(--grid-gutter)));
+  }
+  .chrome .wordmark {
+    left: var(--letter-left);
+    top: 12px;
+    width: var(--letter-w);
+    height: calc(var(--letter-w) * 233 / 702);
+  }
+  .chrome .lettering-1,
+  .chrome .lettering-2,
+  .chrome .lettering-3 {
+    left: var(--letter-left);
+    width: var(--letter-w);
+  }
+  .chrome .lettering-1 {
+    top: calc(var(--wordmark-top) + 23px);
+    height: calc(var(--letter-w) * 135 / 619);
+  }
+  .chrome .lettering-2 {
+    top: calc(var(--wordmark-top) + 32px);
+    height: calc(var(--letter-w) * 82 / 702);
+  }
+  .chrome .lettering-3 {
+    top: calc(var(--wordmark-top) + 12px);
+    height: calc(var(--letter-w) * 124 / 702);
+  }
+  .chrome .site-credits {
+    z-index: 4;
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    margin: 0;
+    color: var(--blue);
+    font-family: var(--grotesk);
+    font-weight: 400;
+    font-size: calc(14 * var(--hk));
+    line-height: normal;
+    text-decoration: none;
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    cursor: pointer;
+    opacity: 0.32;
+  }
+  .chrome .site-credits .credits-name {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    visibility: hidden;
+  }
+  @media (hover: hover) {
+    .chrome .ig-link,
+    .chrome .catalog-entry { transition: opacity 180ms ease; }
+    .chrome .ig-link:hover,
+    .chrome .catalog-entry:hover { opacity: 0.8; }
+    .chrome .site-credits:hover .credits-full { visibility: hidden; }
+    .chrome .site-credits:hover .credits-name { visibility: visible; }
+  }
+  @media (max-width: 440px) {
+    .chrome {
+      --hk: calc(100vw / 375);
+      --wordmark-top: calc(58 * var(--hk) + 24px);
+      height: calc(var(--wordmark-top) + 110 * var(--hk));
+    }
+    .chrome .wordmark,
+    .chrome .catalog-entry,
+    .chrome .site-credits { display: none; }
+    .chrome .vanok,
+    .chrome .regular { display: block; }
+    html[data-theme="1"] .chrome .vanok,
+    html[data-theme="1"] .chrome .regular,
+    html[data-theme="2"] .chrome .vanok,
+    html[data-theme="2"] .chrome .regular,
+    html[data-theme="3"] .chrome .vanok,
+    html[data-theme="3"] .chrome .regular { display: none; }
+    .chrome .crosshair {
+      left: calc(23.231 * var(--hk));
+      top: calc(23.231 * var(--hk));
+    }
+    .chrome .bio {
+      left: calc(194 * var(--hk));
+      top: calc(16 * var(--hk));
+      width: calc(157 * var(--hk));
+      font-size: calc(12 * var(--hk));
+      line-height: calc(14 * var(--hk));
+      white-space: normal;
+    }
+    .chrome .soon {
+      position: fixed;
+      z-index: 6;
+      top: auto;
+      right: calc(24 * var(--hk));
+      bottom: calc(24 * var(--hk) + var(--vv-lift));
+      height: calc(14 * var(--hk));
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: calc(12 * var(--hk));
+      line-height: calc(14 * var(--hk));
+    }
+    .chrome .ig-link {
+      position: fixed;
+      z-index: 6;
+      left: calc(24 * var(--hk));
+      top: auto;
+      bottom: calc(24 * var(--hk) + var(--vv-lift));
+      height: calc(14 * var(--hk));
+      display: flex;
+      align-items: center;
+      font-size: calc(12 * var(--hk));
+      line-height: calc(14 * var(--hk));
+    }
+    .chrome .vanok {
+      left: calc(24 * var(--hk));
+      top: var(--wordmark-top);
+      width: calc(156.387 * var(--hk));
+      height: calc(108.538 * var(--hk));
+    }
+    .chrome .regular {
+      left: calc(136.341 * var(--hk));
+      top: calc(var(--wordmark-top) + (93.593 - 77) * var(--hk));
+      width: calc(214.658 * var(--hk));
+      height: calc(90.339 * var(--hk));
+    }
+    .chrome .lettering-1,
+    .chrome .lettering-2,
+    .chrome .lettering-3 {
+      left: calc(24 * var(--hk));
+      top: var(--wordmark-top);
+      width: calc(327 * var(--hk));
+    }
+    .chrome .lettering-1 { height: calc(71.32 * var(--hk)); }
+    .chrome .lettering-2 { height: calc(327 * var(--hk) * 82 / 702); }
+    .chrome .lettering-3 { height: calc(327 * var(--hk) * 124 / 702); }
+  }
+
+  /* Слот под хедером. Высота ленты меняется внутри него, картинки считаются от полного слота. */
+  .stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .counter {
+    position: relative;
+    flex: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #434343;
+    perspective: 1400px;
+    perspective-origin: 50% 18%;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .counter.is-grab { cursor: grabbing; }
+  .counter.is-grab .good { pointer-events: none; }
+
+  .well {
+    position: absolute;
+    inset: 0;
+    transform: rotateX(var(--tilt, 9deg)) scale(var(--tilt-scale, 1.111));
+    transform-origin: 50% 68%;
+  }
+  .rubber {
+    position: absolute;
+    inset: 0;
+    background-color: #434343;
+    background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 14px);
+    background-size: 14px 100%;
+    background-position: var(--belt-offset, 0px) 0;
+  }
+  .rubber::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: url("assets/belt-matte.svg") repeat;
+    background-position: var(--belt-offset, 0px) 0;
+    opacity: .12; mix-blend-mode: soft-light;
+  }
+  .rubber[data-material="matte"], .rubber[data-material="grain"], .rubber[data-material="worn"] { background-image: none; }
+  .rubber[data-material="grain"]::after { background-image: url("assets/belt-grain.svg"); opacity: .32; }
+  .rubber[data-material="fine"] {
+    background-image: repeating-linear-gradient(90deg, #484848 0 1px, #3e3e3e 1px 2px, #434343 2px 5px);
+    background-size: 5px 100%;
+  }
+  .rubber[data-material="worn"]::after { background-image: url("assets/belt-worn.svg"); opacity: .25; }
+  /* Paired light/shadow edges make the original grooves recessed. */
+  .counter.has-depth .rubber[data-material="original"] {
+    background-image: repeating-linear-gradient(90deg,
+      #343434 0px, #393939 1px, #4c4c4c 2px,
+      #454545 3px, #434343 5px, #434343 12px, #3e3e3e 14px);
+  }
+  .counter.has-depth .rubber[data-material="original"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,.24) 0%, transparent 20%,
+      rgba(255,255,255,.035) 48%, transparent 76%, rgba(0,0,0,.3) 100%);
+    box-shadow: inset 0 5px 8px rgba(0,0,0,.35), inset 0 -6px 10px rgba(0,0,0,.45);
+  }
+  .material-options { border: 0; padding: 0; margin: 14px 0; }
+  .material-options legend { margin-bottom: 6px; }
+  .material-options label { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; cursor: pointer; }
+  .material-options input { margin: 2px 0 0; }
+  .material-options small { display: block; margin-top: 2px; color: #555; }
+  .belt-panel { max-height: calc(100dvh - 32px); overflow-y: auto; }
+  .lane {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 9%;
+    bottom: 8%;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 52px, #000 calc(100% - 52px), transparent 100%);
+  }
+  .track {
+    display: flex;
+    height: 100%;
+    will-change: transform;
+  }
+  .set {
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    gap: var(--gap);
+    padding-right: calc(var(--gap) + var(--seam-extra));
+    flex: none;
+  }
+  .good {
+    flex: none;
+    height: var(--h);
+    aspect-ratio: var(--ratio);
+    margin: 0;
+    transform: rotate(var(--r));
+    transform-origin: 50% 100%;
+    background: #0c0c0c;
+    box-shadow:
+      0 16px 18px rgba(0, 0, 0, 0.42),
+      0 2px 0 rgba(0, 0, 0, 0.55);
+  }
+  .good img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+  .taxonomy-control {
+    position: absolute;
+    z-index: 8;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: calc(100% - 24px);
+    padding: 5px;
+    color: #d7d7d7;
+    background: rgba(28,28,28,.76);
+    border: 1px solid rgba(140,200,140,.55);
+    font-size: 11px;
+    backdrop-filter: blur(8px);
+  }
+  .taxonomy-title { padding: 0 6px; white-space: nowrap; color: #a9aaa5; }
+  .taxonomy-control button {
+    padding: 5px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .taxonomy-control button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue); }
+  .good .project-tag {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    bottom: 0;
+    max-width: 100%;
+    padding: 5px 7px 4px;
+    color: #e6e6e1;
+    background: rgba(25,25,25,.78);
+    font-size: clamp(9px, .82vw, 12px);
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .counter[data-taxonomy="labels"] .good .project-tag { opacity: 1; }
+  .chapter-marker {
+    position: relative;
+    align-self: flex-end;
+    flex: none;
+    width: clamp(112px, 15vw, 220px);
+    height: 34%;
+    min-height: 92px;
+    margin: 0 2px 1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 5px;
+    padding: 0 10px 8px;
+    border-left: 1px solid rgba(140,200,140,.9);
+    color: #d7d7d7;
+    font-size: clamp(10px, 1.05vw, 14px);
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: .035em;
+  }
+  .chapter-marker small { color: #969892; font-size: 9px; letter-spacing: .08em; }
+  .counter[data-taxonomy="groups"] .chapter-marker { display: flex; }
+  .active-project {
+    position: absolute;
+    z-index: 6;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    display: none;
+    align-items: baseline;
+    gap: 9px;
+    padding: 8px 12px;
+    color: #d7d7d7;
+    background: rgba(28,28,28,.8);
+    border: 1px solid rgba(140,200,140,.55);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+  }
+  .active-project small { color: #969892; font-size: 10px; }
+  .counter[data-taxonomy="focus"] .active-project { display: flex; }
+  .counter[data-taxonomy="focus"] .good .project-tag { opacity: 0; }
+  .lip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+    z-index: 4;
+    pointer-events: none;
+    background: #666;
+    border-top: 1px solid #888;
+    border-bottom: 1px solid #333;
+  }
+  .lip.top { top: 0; }
+  .lip.bottom { bottom: 0; }
+  .shade {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    box-shadow: inset 0 28px 36px rgba(0,0,0,0.28), inset 0 -22px 28px rgba(0,0,0,0.34);
+  }
+
+  @media (max-width: 440px) {
+    .lane { top: 8%; bottom: 14%; }
+    .lip { height: 5px; }
+    .taxonomy-control { top: 8px; left: 8px; gap: 2px; padding: 3px; }
+    .taxonomy-title { display: none; }
+    .taxonomy-control button { padding: 5px 6px; font-size: 10px; }
+    .active-project { top: auto; bottom: 20%; max-width: calc(100% - 24px); overflow: hidden; }
+    .chapter-marker { width: 96px; min-height: 72px; padding: 0 6px 6px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track { will-change: auto; }
+  }
+
+  .counter.is-flat { perspective: none; }
+  .counter.is-flat .well { transform: none; }
+
+  .belt-panel {
+    position: fixed;
+    z-index: 40;
+    right: 16px;
+    bottom: 16px;
+    width: min(260px, calc(100vw - 32px));
+    padding: 12px 14px 14px;
+    background: #d7d7d7;
+    color: var(--blue);
+    border: 1px solid var(--blue);
+    font-family: var(--grotesk);
+    font-size: 12px;
+    line-height: 1.3;
+  }
+  .belt-panel[hidden] { display: none; }
+  .belt-panel h2 {
+    margin: 0;
+    padding-right: 52px;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .belt-panel .hint { margin: 4px 0 0; }
+  .belt-panel .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--blue);
+    font: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .belt-panel label.check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .belt-panel label.row { display: block; margin-top: 12px; }
+  .belt-panel label.row span { display: flex; justify-content: space-between; gap: 8px; }
+  .belt-panel b { font-weight: 400; }
+  .belt-panel input { accent-color: var(--blue); }
+  .belt-panel input[type="range"] {
+    display: block;
+    width: 100%;
+    margin: 4px 0 0;
+  }
+  .belt-panel .copy-json {
+    width: 100%; margin-top: 14px; padding: 8px;
+    border: 1px solid currentColor; background: #434343;
+    color: #8CC88C; font: inherit; cursor: pointer;
+  }
+  .belt-panel .json-fallback { width: 100%; height: 160px; margin-top: 8px; font: 11px/1.4 monospace; }
+</style>
+</head>
+<body>
+<header class="chrome">
+  <img class="wordmark" src="assets/wordmark-8cc88c.svg" alt="Vanök Regular">
+  <img class="vanok" src="assets/wordmark-vanok-ui-8cc88c.svg" alt="">
+  <img class="regular" src="assets/wordmark-regular-ui-8cc88c.svg" alt="">
+  <img class="lettering lettering-1" src="design/stub/wordmark-8a7e59.svg" alt="">
+  <img class="lettering lettering-2" src="design/stub/wordmark-green.svg" alt="">
+  <img class="lettering lettering-3" src="design/stub/wordmark-star.svg" alt="">
+  <button type="button" class="crosshair" aria-label="Cycle theme">
+    <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 21.5352 21.5352" fill="none" aria-hidden="true">
+      <path d="M21.1507 10.7676C21.1507 16.502 16.502 21.1507 10.7676 21.1507C5.03321 21.1507 0.384558 16.502 0.384558 10.7676C0.384558 5.03321 5.03321 0.384558 10.7676 0.384558C16.502 0.384558 21.1507 5.03321 21.1507 10.7676Z" stroke-width="0.769115" stroke="currentColor"/>
+      <path d="M15.8609 10.4743C15.8609 13.2853 13.5821 15.564 10.7712 15.564C7.96018 15.564 5.68143 13.2853 5.68143 10.4743C5.68143 7.66331 7.96018 5.38456 10.7712 5.38456C13.5821 5.38456 15.8609 7.66331 15.8609 10.4743Z" stroke-width="0.769115" stroke="currentColor"/>
+      <path d="M10.8646 0.769115L10.8646 20.7661" stroke-width="0.769115" stroke="currentColor"/>
+      <path d="M0.769115 10.3846L20.7661 10.3846" stroke-width="0.769115" stroke="currentColor"/>
+    </svg>
+  </button>
+  <p class="bio">Vanök Regular — a graphic designer and art director based in Belgrad, Serbia</p>
+  <a class="ig-link" href="https://www.instagram.com/vanok.regular/" target="_blank" rel="noopener noreferrer">Instagram</a>
+  <button type="button" class="catalog-entry">Custom signature</button>
+  <a class="soon" href="index.html#/about">About</a>
+  <a class="site-credits" href="https://fovkotov.framer.website" target="_blank" rel="noopener noreferrer"><span class="credits-full">Site Credits</span><span class="credits-name">fovkotov</span></a>
+</header>
+<div class="stage" id="stage">
+<main class="counter" id="counter">
+  <div class="well">
+    <div class="rubber" id="rubber" data-material="original"></div>
+    <div class="lane">
+      <div class="track" id="track"></div>
+    </div>
+  </div>
+  <div class="lip top" aria-hidden="true"></div>
+  <div class="lip bottom" aria-hidden="true"></div>
+  <div class="shade" aria-hidden="true"></div>
+  <div class="active-project" id="active-project" aria-live="polite"><small>СЕЙЧАС</small><span>—</span></div>
+</main>
+</div>
+<aside class="belt-panel" id="belt-panel" hidden aria-label="Лента">
+  <button type="button" class="close">закрыть</button>
+  <h2>Лента</h2>
+  <fieldset class="material-options">
+    <legend>Материал транспортёра</legend>
+    <label><input type="radio" name="belt-material" value="original" checked><span>Исходная лента<small>Редкие канавки, без бликов</small></span></label>
+    <label><input type="radio" name="belt-material" value="matte"><span>Матовая резина<small>Почти гладкая, мелкие поры</small></span></label>
+    <label><input type="radio" name="belt-material" value="grain"><span>Мелкая шагрень<small>Зернистая чёрная резина</small></span></label>
+    <label><input type="radio" name="belt-material" value="fine"><span>Тонкое рифление<small>Частые неглубокие канавки</small></span></label>
+    <label><input type="radio" name="belt-material" value="worn"><span>Потёртая резина<small>Мягкие следы эксплуатации</small></span></label>
+  </fieldset>
+  <label class="check">
+    <input type="checkbox" id="belt-depth" checked>
+    Объём исходной ленты
+  </label>
+  <label class="check">
+    <input type="checkbox" id="belt-perspective" checked>
+    Перспектива
+  </label>
+  <label class="row">
+    <span>Поворот <b id="belt-tilt-val">9°</b></span>
+    <input type="range" id="belt-tilt" min="-45" max="60" step="1" value="9">
+  </label>
+  <label class="row">
+    <span>Высота ленты <b id="belt-height-val">144%</b></span>
+    <input type="range" id="belt-height" min="24" max="200" step="1" value="144">
+  </label>
+  <button type="button" class="copy-json">Копировать JSON</button>
+  <p class="hint" id="copy-status" role="status" aria-live="polite"></p>
+  <textarea class="json-fallback" aria-label="JSON настроек ленты" readonly hidden></textarea>
+  <p class="hint">G — панель · Esc — закрыть</p>
+</aside>
+
+<script>
+(function () {
+  var themes = ['0', '1', '2', '3'];
+  var root = document.documentElement;
+  document.addEventListener('click', function (event) {
+    var btn = event.target.closest && event.target.closest('.crosshair');
+    if (!btn) return;
+    event.preventDefault();
+    var i = themes.indexOf(root.dataset.theme || '0');
+    if (i < 0) i = -1;
+    root.dataset.theme = themes[(i + 1) % themes.length];
+  });
+})();
+</script>
+<script>
+(function () {
+  var GOODS = [
+    ['design/board/we.webp', 'Wild East', '62%', 1500, 1500, '-0.6deg', 'SALUKI', '01'],
+    ['design/board/shot-2230.webp', 'Two figures', '74%', 1012, 1132, '0.5deg', 'SALUKI', '01'],
+    ['design/board/poster-09.webp', 'Blister pack', '48%', 1230, 1291, '-0.3deg', 'SALUKI', '01'],
+    ['design/board/glu-artbook.webp', 'Glukoza artbook', '40%', 4096, 2048, '0.4deg', 'GLUKOZA', '02'],
+    ['design/board/sub-08.webp', 'Sub Urban', '88%', 2160, 2880, '-0.8deg', 'SUB URBAN', '05'],
+    ['design/board/candle.webp', 'Candle', '34%', 719, 651, '1deg', 'РАЗНОЕ', '—'],
+    ['design/board/feduk-shirt.webp', 'Feduk shirt', '58%', 1316, 1316, '0.2deg', 'FEDUK', '04'],
+    ['design/board/photo-1121.webp', 'Caps', '76%', 1024, 1280, '-0.4deg', 'FEDUK', '04'],
+    ['design/board/shot-2215.webp', 'Vinyl', '42%', 2848, 1592, '0.7deg', 'SALUKI', '01'],
+    ['design/board/kaik-photo.webp', 'Kaik', '86%', 1696, 2528, '-0.5deg', 'KAIK', '03'],
+    ['design/board/cofef.webp', 'Cofef', '46%', 3416, 2155, '0.3deg', 'РАЗНОЕ', '—'],
+    ['design/board/poster-15.webp', 'Portrait', '54%', 1196, 945, '-0.9deg', 'SALUKI', '01'],
+    ['design/board/feduk-12.webp', 'Feduk poster', '90%', 2800, 4000, '0.4deg', 'FEDUK', '04'],
+    ['design/board/glu-poster.webp', 'Glukoza poster', '80%', 2477, 3506, '-0.2deg', 'GLUKOZA', '02'],
+    ['design/board/layer-18.webp', 'Plate', '50%', 2557, 2612, '0.8deg', 'РАЗНОЕ', '—'],
+    ['design/board/kaik-3.webp', 'Kaik still', '70%', 2160, 2880, '-0.6deg', 'KAIK', '03']
+  ];
+  var TAXONOMY = 'labels';
+  var PROJECT_ORDER = ['SALUKI', 'GLUKOZA', 'KAIK', 'FEDUK', 'SUB URBAN', 'РАЗНОЕ'];
+
+  var PITCH = 14;
+  var stage = document.getElementById('stage');
+  var counter = document.getElementById('counter');
+  var beltHeight = document.getElementById('belt-height');
+  var beltHeightVal = document.getElementById('belt-height-val');
+  var beltTilt = document.getElementById('belt-tilt');
+  var beltTiltVal = document.getElementById('belt-tilt-val');
+  var rubber = document.getElementById('rubber');
+  var track = document.getElementById('track');
+  var root = document.documentElement;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var sets = [];
+  var focusItems = [];
+  var loopW = 1;
+  var x = 0;
+  var vel = 0;
+  var grab = null;
+  var last = performance.now();
+
+  function makeSet() {
+    var set = document.createElement('div');
+    set.className = 'set';
+    var items = GOODS.slice();
+    if (TAXONOMY === 'groups') {
+      items = [];
+      PROJECT_ORDER.forEach(function (project) {
+        var group = GOODS.filter(function (item) { return item[6] === project; });
+        if (!group.length) return;
+        items.push({ marker: true, project: project, number: group[0][7], count: group.length });
+        items = items.concat(group);
+      });
+    }
+    items.forEach(function (item) {
+      if (item.marker) {
+        var marker = document.createElement('div');
+        marker.className = 'chapter-marker';
+        marker.innerHTML = '<small>' + item.number + ' / ' + String(item.count).padStart(2, '0') + ' РАБОТ</small><span>' + item.project + '</span>';
+        set.appendChild(marker);
+        return;
+      }
+      var fig = document.createElement('figure');
+      fig.className = 'good';
+      fig.dataset.project = item[6];
+      fig.dataset.projectNumber = item[7];
+      fig.dataset.h = parseFloat(item[2]);
+      fig.style.setProperty('--h', item[2]);
+      fig.style.setProperty('--ratio', item[3] + ' / ' + item[4]);
+      fig.style.setProperty('--r', item[5]);
+      var img = document.createElement('img');
+      img.src = item[0];
+      img.alt = item[1];
+      img.draggable = false;
+      fig.appendChild(img);
+      var tag = document.createElement('span');
+      tag.className = 'project-tag';
+      tag.textContent = item[7] + ' / ' + item[6];
+      fig.appendChild(tag);
+      set.appendChild(fig);
+    });
+    return set;
+  }
+
+  function renderSets() {
+    sets = [makeSet(), makeSet()];
+    track.replaceChildren.apply(track, sets);
+    focusItems = Array.from(track.querySelectorAll('.good'));
+    layout();
+  }
+
+  renderSets();
+
+  function cruise() {
+    return (counter.clientWidth || 1200) / 13;
+  }
+
+  function clampVel(v) {
+    var max = (counter.clientWidth || 1200) * 1.8;
+    return Math.max(-max, Math.min(max, v));
+  }
+
+  function laneShare() {
+    return window.matchMedia('(max-width: 440px)').matches ? (1 - 0.08 - 0.14) : (1 - 0.09 - 0.08);
+  }
+
+  function sizePictures() {
+    var basis = stage.clientHeight * laneShare();
+    if (basis < 1) return;
+    track.querySelectorAll('.good').forEach(function (fig) {
+      fig.style.height = Math.max(1, Math.round(basis * (parseFloat(fig.dataset.h) / 100))) + 'px';
+    });
+  }
+
+  function applyBelt() {
+    var n = Number(beltHeight.value);
+    counter.style.height = Math.max(1, Math.round(stage.clientHeight * n / 100)) + 'px';
+    beltHeightVal.textContent = n + '%';
+  }
+
+  function applyTilt() {
+    var deg = Number(beltTilt.value);
+    var scale = 1 + Math.abs(deg) * (0.16 / 13);
+    root.style.setProperty('--tilt', deg + 'deg');
+    root.style.setProperty('--tilt-scale', scale.toFixed(3));
+    beltTiltVal.textContent = deg + '°';
+  }
+
+  function layout() {
+    root.style.setProperty('--seam-extra', '0px');
+    var raw = sets[0].offsetWidth;
+    if (!raw) return;
+    var extra = (PITCH - (raw % PITCH)) % PITCH;
+    root.style.setProperty('--seam-extra', extra + 'px');
+    loopW = sets[0].offsetWidth || raw;
+  }
+
+  function shown() {
+    var w = loopW;
+    if (w <= 1) return 0;
+    var m = x - w * Math.floor(x / w);
+    return m - w;
+  }
+
+  function paint() {
+    var s = shown();
+    track.style.transform = 'translate3d(' + s.toFixed(2) + 'px,0,0)';
+    rubber.style.setProperty('--belt-offset', s.toFixed(2) + 'px');
+  }
+
+  var focusLabel = document.querySelector('#active-project span');
+  var focusClock = 0;
+  function updateFocus(now) {
+    if (TAXONOMY !== 'focus' || now - focusClock < 140) return;
+    focusClock = now;
+    var center = counter.getBoundingClientRect().left + counter.clientWidth / 2;
+    var nearest = null;
+    var nearestDistance = Infinity;
+    focusItems.forEach(function (item) {
+      var rect = item.getBoundingClientRect();
+      var distance = Math.abs(rect.left + rect.width / 2 - center);
+      if (distance < nearestDistance) { nearest = item; nearestDistance = distance; }
+    });
+    if (nearest && focusLabel.textContent !== nearest.dataset.project) {
+      focusLabel.textContent = nearest.dataset.project;
+    }
+  }
+
+  function frame(now) {
+    var raw = (now - last) / 1000;
+    var dt = raw > 0 ? Math.min(0.05, raw) : 0;
+    last = now;
+    if (!grab) {
+      var target = reduce ? 0 : cruise();
+      var k = reduce ? 3.2 : 1.7;
+      vel += (target - vel) * (1 - Math.exp(-k * dt));
+      x += vel * dt;
+    }
+    paint();
+    updateFocus(now);
+    requestAnimationFrame(frame);
+  }
+
+  document.querySelectorAll('[data-taxonomy]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      TAXONOMY = button.dataset.taxonomy;
+      counter.dataset.taxonomy = TAXONOMY;
+      document.querySelectorAll('[data-taxonomy]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      renderSets();
+      paint();
+    });
+  });
+
+  counter.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0) return;
+    if (e.target.closest && e.target.closest('a, button')) return;
+    counter.setPointerCapture(e.pointerId);
+    grab = { id: e.pointerId, lastX: e.clientX, lastT: performance.now() };
+    counter.classList.add('is-grab');
+  });
+
+  counter.addEventListener('pointermove', function (e) {
+    if (!grab || e.pointerId !== grab.id) return;
+    var now = performance.now();
+    var dx = e.clientX - grab.lastX;
+    var dt = Math.max(0.008, (now - grab.lastT) / 1000);
+    x += dx;
+    vel = clampVel(dx / dt);
+    paint();
+    grab.lastX = e.clientX;
+    grab.lastT = now;
+  });
+
+  function endGrab(e) {
+    if (!grab || e.pointerId !== grab.id) return;
+    grab = null;
+    counter.classList.remove('is-grab');
+  }
+  counter.addEventListener('pointerup', endGrab);
+  counter.addEventListener('pointercancel', endGrab);
+
+  counter.addEventListener('wheel', function (e) {
+    if (e.target.closest && e.target.closest('.chrome')) return;
+    e.preventDefault();
+    var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    var unit = e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? counter.clientWidth : 1;
+    var px = delta * unit;
+    x += px;
+    vel = clampVel(vel + px * 2.2);
+  }, { passive: false });
+
+  window.addEventListener('resize', function () {
+    sizePictures();
+    applyBelt();
+    layout();
+  });
+  track.querySelectorAll('img').forEach(function (img) {
+    if (!img.complete) img.addEventListener('load', layout, { once: true });
+  });
+  sizePictures();
+  applyBelt();
+  layout();
+  vel = reduce ? 0 : cruise();
+  requestAnimationFrame(frame);
+
+  var panel = document.getElementById('belt-panel');
+  var depth = document.getElementById('belt-depth');
+  function applyDepth() {
+    counter.classList.toggle('has-depth', depth.checked);
+  }
+  depth.addEventListener('change', applyDepth);
+  applyDepth();
+  panel.querySelectorAll('input[name="belt-material"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      if (input.checked) rubber.dataset.material = input.value;
+    });
+  });
+  var perspective = document.getElementById('belt-perspective');
+  panel.querySelector('.copy-json').addEventListener('click', async function () {
+    var root = document.documentElement;
+    var json = JSON.stringify({
+      version: 1,
+      page: 'belt',
+      theme: root.dataset.theme || '0',
+      background: getComputedStyle(rubber).backgroundColor,
+      letteringColor: getComputedStyle(root).getPropertyValue('--blue').trim(),
+      material: rubber.dataset.material || 'original',
+      depth: depth.checked,
+      perspective: perspective.checked,
+      tiltDegrees: Number(beltTilt.value),
+      heightPercent: Number(beltHeight.value)
+    }, null, 2);
+    var status = document.getElementById('copy-status');
+    var fallback = panel.querySelector('.json-fallback');
+    fallback.value = json;
+    try {
+      await navigator.clipboard.writeText(json);
+      fallback.hidden = true;
+      status.textContent = 'Скопировано — вставь в чат.';
+    } catch (error) {
+      fallback.hidden = false;
+      fallback.focus();
+      fallback.select();
+      status.textContent = 'Нажми ⌘C / Ctrl+C и вставь в чат.';
+    }
+  });
+  function applyPerspective() {
+    counter.classList.toggle('is-flat', !perspective.checked);
+  }
+  perspective.addEventListener('change', applyPerspective);
+  beltHeight.addEventListener('input', applyBelt);
+  beltTilt.addEventListener('input', applyTilt);
+  applyTilt();
+  panel.querySelector('.close').addEventListener('click', function () {
+    panel.hidden = true;
+  });
+  window.addEventListener('keydown', function (e) {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === 'Escape') {
+      panel.hidden = true;
+      return;
+    }
+    var tag = (e.target && e.target.tagName) || '';
+    var type = ((e.target && e.target.type) || '').toLowerCase();
+    if (tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (tag === 'INPUT' && type !== 'checkbox' && type !== 'radio') return;
+    if (e.code !== 'KeyG') return;
+    e.preventDefault();
+    panel.hidden = !panel.hidden;
+  });
+})();
+</script>
+</body>
+</html>
